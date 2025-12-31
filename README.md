@@ -1,36 +1,145 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smart Agro 
 
-## Getting Started
+Smart Agro is a web application built with **Next.js** to help farmers manage agricultural data in a simple and modern way.
+The project is designed to be multilingual (English / French) and scalable for future IoT integrations.
 
-First, run the development server:
+---
+
+## Tech Stack
+
+* **Next.js 14+** (App Router)
+* **TypeScript**
+* **Tailwind CSS**
+* **React Context** (for global language management)
+
+---
+
+## Project Setup
 
 ```bash
+npx create-next-app@latest smart-agro \
+  --ts --eslint --tailwind --app --src-dir --import-alias "@/*"
+
+cd smart-agro
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app runs on:
+👉 `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## What is already implemented
 
-## Learn More
+### 1. Landing page (role selection)
 
-To learn more about Next.js, take a look at the following resources:
+* First page allows the user to choose between:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+  * **Administrator**
+  * **Farmer**
+* Clean UI with background image
+* Real project logo (image-based, not SVG)
+* Logo fills its container and is fully rounded
+* Buttons redirect to the login page with the selected role
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+### 2. Language management (English / French)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+* A **language dropdown** on the landing page
+* Supported languages:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+  * 🇬🇧 English
+  * 🇫🇷 Français
+* Selected language:
+
+  * Updates all texts instantly
+  * Is stored in `localStorage`
+  * Persists across page navigation
+  * Is synchronized with the URL (`?lang=en` / `?lang=fr`)
+
+---
+
+### 3. Global i18n system (no external library)
+
+* Centralized translations in one file
+* Custom hook `useT()` for translations
+
+Example usage:
+
+```ts
+const { t } = useT();
+
+<h1>{t("appName")}</h1>
+```
+
+* Missing translations show a warning in the console
+* Easy to extend for new pages and features
+
+---
+
+### 4. LanguageProvider (global state)
+
+* React Context used to manage the language
+* Wrapped around the entire app in `layout.tsx`
+* No render loops or React warnings
+* Stable with Next.js Fast Refresh
+
+---
+
+### 5. Routing structure (in progress)
+
+* `/` → Landing / role selection
+* `/login` → Login page (placeholder for now)
+* Role is passed via URL (`?role=admin` or `?role=farmer`)
+
+---
+
+## Folder structure (current)
+
+```
+src/
+ ├─ app/
+ │   ├─ layout.tsx
+ │   ├─ page.tsx
+ │   └─ login/
+ │       └─ page.tsx
+ ├─ components/
+ │   ├─ RoleSelection/
+ │   │   └─ RoleSelection.tsx
+ │   └─ i18n/
+ │       ├─ LanguageProvider.tsx
+ │       ├─ translations.ts
+ │       └─ useT.ts
+ └─ public/
+     └─ images/
+         ├─ logo.png
+         └─ landing-bg.jpg
+```
+
+---
+
+## Next steps
+
+* Build the **Login page UI** (admin / farmer)
+* Create **Farmer layout**:
+
+  * Navbar (Dashboard, Terrains, Parcelles, Capteurs, Profil, About)
+  * Search bar
+  * Footer
+* Create **Admin layout**
+* Connect to real sensor / IoT data (later phase)
+
+---
+
+## Notes
+
+This project is intentionally built **step by step**, focusing on:
+
+* clean architecture
+* readability
+* scalability
+* real-world practices (not just demo code)
+
+---
+
