@@ -1,0 +1,30 @@
+export const translations = {
+    fr: {
+      editProfile: "Modifier le profil",
+      saveChanges: "Enregistrer les modifications",
+      myInfo: "Mes informations",
+      myStats: "Mes statistiques",
+      lastActivity: "Dernière activité",
+      terrains: "Terrains créés",
+      parcelles: "Parcelles suivies",
+      capteurs: "Capteurs actifs",
+      langueLabel: "Langue de l'application",
+      nomLabel: "Nom complet",
+      exploitationLabel: "Nom de l'exploitation",
+      phoneLabel: "Téléphone",
+    },
+    en: {
+      editProfile: "Edit Profile",
+      saveChanges: "Save Changes",
+      myInfo: "My Information",
+      myStats: "My Statistics",
+      lastActivity: "Recent Activity",
+      terrains: "Terrains created",
+      parcelles: "Parcels tracked",
+      capteurs: "Active sensors",
+      langueLabel: "App Language",
+      nomLabel: "Full Name",
+      exploitationLabel: "Farm Name",
+      phoneLabel: "Phone Number",
+    }
+  };
