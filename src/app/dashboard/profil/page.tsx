@@ -175,22 +175,21 @@ export default function ProfilPage() {
 
                 <form className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ProfileInput label={t.nom} value={userData.nom} isEditing={isEditing} onChange={(v) => setUserData({...userData, nom: v})} />
-                    <ProfileInput label={t.email} value={userData.email} isEditing={isEditing} onChange={(v) => setUserData({...userData, email: v})} />
-                    <ProfileInput label={t.tel} value={userData.telephone} isEditing={isEditing} onChange={(v) => setUserData({...userData, telephone: v})} />
-                    <ProfileInput label={t.ferme} value={userData.ferme} isEditing={isEditing} onChange={(v) => setUserData({...userData, nomExploitation: v})} />
+                    <ProfileInput label={t.nom} value={userData.nom} isEditing={isEditing} onChange={(v: string) => setUserData({...userData, nom: v})} />
+                    <ProfileInput label={t.email} value={userData.email} isEditing={isEditing} onChange={(v: string) => setUserData({...userData, email: v})} />
+                    <ProfileInput label={t.tel} value={userData.telephone} isEditing={isEditing} onChange={(v: string) => setUserData({...userData, telephone: v})} />
                   </div>
 
                   {isEditing && (
                     <div className="pt-6 border-t border-gray-50 space-y-6 animate-in slide-in-from-top-2">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
                         <div className="relative">
-                          <ProfileInput label={t.pass} value={userData.password} isEditing={true} type={showPass ? "text" : "password"} onChange={(v) => setUserData({...userData, password: v})} />
+                          <ProfileInput label={t.pass} value={userData.password} isEditing={true} type={showPass ? "text" : "password"} onChange={(v: string) => setUserData({...userData, password: v})} />
                           <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-4 top-9 text-gray-400">
                             {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                           </button>
                         </div>
-                        <ProfileInput label={t.confirmPass} value={userData.confirmPassword} isEditing={true} type={showPass ? "text" : "password"} onChange={(v) => setUserData({...userData, confirmPassword: v})} />
+                        <ProfileInput label={t.confirmPass} value={userData.confirmPassword} isEditing={true} type={showPass ? "text" : "password"} onChange={(v: string) => setUserData({...userData, confirmPassword: v})} />
                       </div>
                     </div>
                   )}

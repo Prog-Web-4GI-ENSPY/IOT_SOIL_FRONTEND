@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-
     "@headlessui/react": "^2.2.9",
     "@nextui-org/react": "^2.6.11",
     "lucide-react": "^0.562.0",
@@ -20,6 +19,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/lodash": "^4.17.21",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
