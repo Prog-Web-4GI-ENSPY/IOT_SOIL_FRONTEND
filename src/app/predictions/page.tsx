@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import DashboardHeader from '@/components/shared/Header';
-import DashboardFooter from '@/components/shared/Footer';
+import DashboardFooter from '@/components/shared/Footer'; // Réintégré
 import { parcelService } from "@/services/parcelService";
+import { predictionService } from "@/services/predictionService";
+import { BrainCircuit, CheckCircle, ChevronDown, Loader2, Sparkles, Sprout } from "lucide-react";
 
 export default function PredictionsPage() {
+  const router = useRouter();
   const [parcelles, setParcelles] = useState<any[]>([]);
   const [selectedParcelId, setSelectedParcelId] = useState("");
   const [prediction, setPrediction] = useState<any>(null);
@@ -13,171 +17,131 @@ export default function PredictionsPage() {
   const [isApplied, setIsApplied] = useState(false);
 
   useEffect(() => {
-    const loadData = async () => {
-      const data: any = await parcelService.getParcelles();
-      setParcelles(data);
+    const loadParcelles = async () => {
+      try {
+        const data: any = await parcelService.getParcelles();
+        setParcelles(data);
+      } catch (error) {
+        console.error("Erreur chargement", error);
+      }
     };
-    loadData();
+    loadParcelles();
   }, []);
 
   const handleSelectChange = async (id: string) => {
     setSelectedParcelId(id);
     setIsApplied(false);
-    if (!id) {
-      setPrediction(null);
-      return;
-    }
+    if (!id) { setPrediction(null); return; }
 
     setLoading(true);
-    
-    // --- SIMULATION APPEL BACKEND (COMMENTÉ) ---
-    /*
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/predict/${id}`);
-      const data = await response.json();
-      setPrediction(data);
+      const result = await predictionService.getPrediction(id);
+      setPrediction(result);
     } catch (error) {
       console.error(error);
-    }
-    */
-
-    // Simulation d'un délai de réflexion de l'IA
-    setTimeout(() => {
-      setPrediction({
-        culture: "Maïs Doux",
-        score: "94%",
-        raison: "Analyse simulée : Les niveaux d'humidité et d'azote sont optimaux pour cette variété sur cette parcelle.",
-        rendement: "+15%"
-      });
+    } finally {
       setLoading(false);
-    }, 1000);
-  };
-  
-  /*
-  const handleApplySimulation = async () => {
-    if (!selectedParcelId || !prediction) return;
-
-    // --- SIMULATION ENREGISTREMENT BACKEND (COMMENTÉ) ---
-    /*
-    try {
-      await parcelService.updateParcel(selectedParcelId, { 
-        culturePredite: prediction.culture 
-      });
-    } catch (error) {
-      console.error(error);
     }
-    */
-
-    // MISE À JOUR LOCALE DE LA CARTE
-    // On remplace "Aucune donnée" par la valeur prédite dans l'état local
-    /*setParcelles(prevParcelles => 
-      prevParcelles.map(p => 
-        p.id === selectedParcelId 
-          ? { ...p, culturePredite: prediction.culture } 
-          : p
-      )
-    );
-
-    setIsApplied(true);
-    alert(`Simulation : La culture "${prediction.culture}" a été appliquée à la parcelle. La carte est mise à jour.`);
   };
-  */
 
-  const handleApplySimulation = () => {
+  const handleApply = async () => {
     if (!selectedParcelId || !prediction) return;
-  
-    // 1. Récupérer les données actuelles du localStorage ou créer un objet vide
-    const predictionsStockees = JSON.parse(localStorage.getItem('simulated_predictions') || '{}');
-  
-    // 2. Associer la culture à l'ID de la parcelle
-    predictionsStockees[selectedParcelId] = prediction.culture;
-  
-    // 3. Sauvegarder dans le navigateur
-    localStorage.setItem('simulated_predictions', JSON.stringify(predictionsStockees));
-  
-    setIsApplied(true);
-    
-    // 4. Rediriger vers la liste des parcelles pour voir le changement
-    alert(`Simulation : "${prediction.culture}" enregistrée. Retour à vos parcelles.`);
-    window.location.href = "/dashboard/parcelles";
+    try {
+      await predictionService.applyCulture(selectedParcelId, prediction.culture);
+      setIsApplied(true);
+      setTimeout(() => router.push("/dashboard/parcelles"), 1500);
+    } catch (error) {
+      alert("Erreur lors de l'enregistrement.");
+    }
   };
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#F1F8F4]">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC]">
       <DashboardHeader />
 
-      <main className="flex-grow p-8 max-w-4xl mx-auto w-full">
-        <h1 className="text-3xl font-black text-[#1A4D2E] text-center mb-8">Assistant de Culture (Mode Simulation)</h1>
+      <main className="flex-grow p-6 lg:p-12 max-w-4xl mx-auto w-full">
+        <header className="text-center mb-10">
+          <div className="inline-flex p-3 bg-orange-100 rounded-2xl mb-4">
+            <BrainCircuit className="w-8 h-8 text-orange-600" />
+          </div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Assistant IA</h1>
+          <p className="text-slate-500 font-medium mt-2 text-lg">Analyse intelligente de vos sols</p>
+        </header>
 
-        {/* SELECTEUR DE PARCELLE */}
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-gray-100 mb-8">
-          <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Parcelle à analyser</label>
+        {/* SELECTEUR */}
+        <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 mb-8 transition-all hover:shadow-md">
+          <label className="block text-[11px] font-black text-slate-400 mb-3 uppercase tracking-[0.2em]">Parcelle à analyser</label>
           <div className="relative">
             <select 
               value={selectedParcelId}
               onChange={(e) => handleSelectChange(e.target.value)}
-              className="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-xl font-bold text-[#1A4D2E] outline-none focus:border-[#22C55E] appearance-none"
+              className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-slate-800 outline-none focus:border-[#22C55E] appearance-none transition-all cursor-pointer"
             >
-              <option value="">-- Sélectionner une parcelle --</option>
+              <option value="">Choisir une parcelle...</option>
               {parcelles.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.nom} {p.culturePredite ? `(${p.culturePredite})` : "(Aucune donnée)"}
+                  {p.nom} {p.culturePredite ? `— Actuellement : ${p.culturePredite}` : ""}
                 </option>
               ))}
             </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-              <i className="fas fa-chevron-down"></i>
-            </div>
+            <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           </div>
         </div>
 
         {/* ZONE DE RÉSULTAT */}
-        <div className="min-h-[300px]">
+        <div className="relative min-h-[400px]">
           {loading ? (
-            <div className="bg-white rounded-[32px] p-16 text-center shadow-sm border border-gray-100">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#22C55E] mx-auto mb-4"></div>
-              <p className="text-[#1A4D2E] font-bold">Calcul des probabilités par l'IA...</p>
+            <div className="bg-white rounded-[40px] p-20 text-center shadow-sm border border-slate-100">
+              <Loader2 className="w-12 h-12 text-[#22C55E] animate-spin mx-auto mb-6" />
+              <p className="text-slate-900 font-black text-xl">Calcul du rendement optimal...</p>
             </div>
           ) : prediction ? (
-            <div className="bg-white rounded-[32px] p-8 shadow-xl border border-green-50 animate-in fade-in slide-in-from-bottom-2">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <span className="text-[#22C55E] text-xs font-black uppercase tracking-tighter">Culture Recommandée</span>
-                  <h2 className="text-4xl font-black text-[#1A4D2E] mt-1">{prediction.culture}</h2>
+            <div className="bg-white rounded-[40px] p-10 shadow-xl border border-green-50 animate-in fade-in zoom-in duration-500">
+              <div className="flex items-center gap-3 text-[#22C55E] mb-4">
+                <Sparkles className="w-5 h-5" />
+                <span className="text-sm font-black uppercase tracking-widest">Culture Recommandée</span>
+              </div>
+              
+              <div className="flex items-center gap-5 mb-8">
+                <div className="p-4 bg-green-100 rounded-3xl">
+                  <Sprout className="w-10 h-10 text-green-600" />
                 </div>
-                <div className="bg-[#e8f5e9] p-4 rounded-2xl text-center border-l-4 border-[#2d8c44]">
-                  <p className="text-3xl font-black text-[#1a5c2b]">{prediction.score}</p>
-                  <p className="text-[10px] text-gray-500 font-bold uppercase">Affinité</p>
-                </div>
+                <h2 className="text-5xl font-black text-slate-900">{prediction.culture}</h2>
               </div>
 
-              <div className="bg-gray-50 p-6 rounded-2xl text-gray-600 italic mb-8 border border-gray-100">
-                "{prediction.raison}"
+              <div className="bg-slate-50 p-8 rounded-3xl mb-10 border border-slate-100">
+                <p className="text-slate-600 leading-relaxed italic text-lg">
+                  "{prediction.raison}"
+                </p>
               </div>
 
               <button 
-                onClick={handleApplySimulation}
+                onClick={handleApply}
                 disabled={isApplied}
-                className={`w-full py-4 rounded-xl font-black text-lg transition-all shadow-md flex items-center justify-center gap-2 ${
+                className={`w-full py-5 rounded-[24px] font-black text-xl shadow-lg transition-all flex items-center justify-center gap-3 ${
                   isApplied 
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-                  : "bg-[#1A4D2E] text-white hover:bg-[#2d8c44] hover:-translate-y-1"
+                  ? "bg-green-100 text-green-600" 
+                  : "bg-[#1A4D2E] text-white hover:bg-[#22C55E] hover:-translate-y-1"
                 }`}
               >
                 {isApplied ? (
-                  <> <i className="fas fa-check-circle"></i> Culture appliquée </>
+                  <> <CheckCircle className="w-6 h-6" /> Appliquée avec succès </>
                 ) : (
-                  "Appliquer à la carte"
+                  "Confirmer cette culture"
                 )}
               </button>
             </div>
           ) : (
-            <div className="border-2 border-dashed border-gray-200 rounded-[32px] p-20 text-center text-gray-400 font-medium">
-              Veuillez sélectionner une parcelle pour simuler une prédiction.
+            <div className="border-4 border-dashed border-slate-100 rounded-[40px] p-24 text-center">
+              <p className="text-slate-400 font-bold text-lg">
+                Veuillez sélectionner une zone pour démarrer l'analyse.
+              </p>
             </div>
           )}
         </div>
       </main>
 
+      {/* FOOTER RÉINTÉGRÉ ICI */}
       <DashboardFooter />
     </div>
   );
