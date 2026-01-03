@@ -1,5 +1,7 @@
 // src/services/authService.ts
 
+import { User } from "@/types/user";
+
 const API_URL = "http://localhost:5000/api/user";
 
 export const authService = {
@@ -37,7 +39,7 @@ export const authService = {
     /**
      * Met à jour les informations du profil
      */
-    updateProfile: async (userData: any) => {
+    updateProfile: async (userData: User) => {
       try {
         /* // --- LOGIQUE BACKEND (Pure API) ---
         // Le backend renvoie juste la donnée mise à jour.

@@ -1,3 +1,5 @@
+import { Terrain } from "@/types/user";
+
 // Simulation d'une base de données en mémoire pour le mode démo
 let mockTerrains = [
   { id: 1, nom: "Terrain Nord", superficie: 500, pays: "Cameroun", ville: "Yaoundé", quartier: "Melen" },
@@ -50,7 +52,7 @@ export const terrainService = {
     });
   },
 
-  saveTerrain: async (terrain: any) => {
+  saveTerrain: async (terrain: Terrain) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (terrain.id) {

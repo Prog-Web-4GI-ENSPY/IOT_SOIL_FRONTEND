@@ -1,5 +1,7 @@
 // src/services/sensorService.ts
 
+import { Sensor } from "@/types/user";
+
 const getStoredSensors = () => {
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem('real_sensors_list');
@@ -8,7 +10,7 @@ const getStoredSensors = () => {
   return [];
 };
 
-let mockSensors: any[] = [];
+let mockSensors: Sensor[] = [];
 
 // URL de base de votre API (à adapter selon votre environnement)
 const API_URL = "http://localhost:5000/api/sensors"; 
@@ -30,7 +32,7 @@ export const sensorService = {
     */
 
     // --- SIMULATION ---
-    return new Promise((resolve) => {
+    return new Promise<Sensor[]>((resolve) => {
       mockSensors = getStoredSensors(); // On synchronise avec le stockage
       setTimeout(() => resolve([...mockSensors]), 400);
     });
@@ -39,7 +41,7 @@ export const sensorService = {
   /**
    * ENREGISTRER OU MODIFIER UN CAPTEUR
    */
-  saveSensor: async (sensor: any) => {
+  saveSensor: async (sensor: Sensor) => {
     /*
     // --- LOGIQUE BACKEND ---
     try {
@@ -68,7 +70,7 @@ export const sensorService = {
 
         if (sensor.id) {
           // Mise à jour
-          currentSensors = currentSensors.map(s => s.id === sensor.id ? { ...sensor } : s);
+          currentSensors = currentSensors.map((s:Sensor) => s.id === sensor.id ? { ...sensor } : s );
         } else {
           // Création (génération d'un ID temporaire)
           const newSensor = { ...sensor, id: Date.now() };
@@ -106,13 +108,13 @@ export const sensorService = {
     return new Promise((resolve) => {
       setTimeout(() => {
         const currentSensors = getStoredSensors();
-        const filtered = currentSensors.filter(s => s.id !== id);
+        const filtered = currentSensors.filter((s:Sensor) => s.id !== id);
         
         // On met à jour le storage après suppression
         localStorage.setItem('real_sensors_list', JSON.stringify(filtered));
         mockSensors = filtered;
         const dictionary: Record<string, string[]> = {};
-      filtered.forEach((s: any) => {
+      filtered.forEach((s: Sensor) => {
         if (!dictionary[s.parcelleId]) dictionary[s.parcelleId] = [];
         dictionary[s.parcelleId].push(s.nom);
       });

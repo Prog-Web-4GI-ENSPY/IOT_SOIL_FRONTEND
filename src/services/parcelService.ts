@@ -1,5 +1,7 @@
 // src/services/parcelService.ts
 
+import { Parcelle } from "@/types/user";
+
 // Simulation de la base de données locale
 let mockParcelles = [
   { 
@@ -52,7 +54,7 @@ export const parcelService = {
       */
 
       // --- LOGIQUE SIMULÉE ---
-      return new Promise((resolve) => {
+      return new Promise<Parcelle[]>((resolve) => {
           setTimeout(() => resolve([...mockParcelles]), 400);
       });
   },
@@ -60,7 +62,7 @@ export const parcelService = {
   /**
    * ENREGISTRER OU MODIFIER UNE PARCELLE
    */
-  saveParcelle: async (parcelle: any) => {
+  saveParcelle: async (parcelle: Parcelle) => {
       /* // --- LOGIQUE BACKEND ---
       try {
           const isUpdate = !!parcelle.id;
@@ -124,7 +126,7 @@ export const parcelService = {
   /**
    * MISE À JOUR PARTIELLE (PATCH)
    */
-  updateParcel: async (id: string | number, data: any) => {
+  updateParcel: async (id: string | number, data: Parcelle) => {
       /* // --- LOGIQUE BACKEND ---
       try {
           const response = await fetch(`${API_URL}/${id}`, {
