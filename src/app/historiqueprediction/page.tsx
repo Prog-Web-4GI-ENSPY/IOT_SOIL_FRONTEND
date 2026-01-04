@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import DashboardHeader from '@/components/shared/Header';
-import DashboardFooter from '@/components/shared/Footer';
-import { parcelService } from "@/services/parcelService";
+import DashboardHeader from '@/components/layout/Header';
+import DashboardFooter from '@/components/layout/Footer';
+import { parcelService } from "@/features/parcels/services/parcelService";
 
 export default function PredictionsListPage() {
   const [predictions, setPredictions] = useState<any[]>([]);

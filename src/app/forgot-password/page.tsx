@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
+import ForgotPasswordForm from '@/features/auth/components/ForgotPasswordForm';
 import { Suspense } from 'react';
 
 function ForgotPasswordContent() {

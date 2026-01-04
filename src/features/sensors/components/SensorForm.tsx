@@ -1,14 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { sensorService } from "@/services/sensorService";
-import { parcelService } from "@/services/parcelService";
+import { sensorService } from "../services/sensorService";
+import { parcelService } from "@/features/parcels/services/parcelService";
 
 export default function SensorForm({ initialData, onSuccess, onCancel }: any) {
   const [loading, setLoading] = useState(false);
   const [parcellesExistantes, setParcellesExistantes] = useState<any[]>([]);
   const [formData, setFormData] = useState(initialData || {
-    nom: "", 
-    typeMesure: "Humidité du sol (h)", 
+    nom: "",
+    typeMesure: "Humidité du sol (h)",
     parcelleId: ""
   });
 
@@ -29,14 +29,14 @@ export default function SensorForm({ initialData, onSuccess, onCancel }: any) {
       await sensorService.saveSensor(formData);
 
       const currentSensors = JSON.parse(localStorage.getItem('smartagro_sensors_list') || '[]');
-    
-    const newSensor = {
-      ...formData,
-      id: Date.now() // On génère un ID pour que la liste puisse l'afficher
-    };
 
-    currentSensors.push(newSensor);
-    localStorage.setItem('smartagro_sensors_list', JSON.stringify(currentSensors));
+      const newSensor = {
+        ...formData,
+        id: Date.now() // On génère un ID pour que la liste puisse l'afficher
+      };
+
+      currentSensors.push(newSensor);
+      localStorage.setItem('smartagro_sensors_list', JSON.stringify(currentSensors));
 
       // 2. LOGIQUE DE SIMULATION LOCALSTORAGE (Indispensable pour la mise à jour de la carte)
       const associationsStockees = JSON.parse(localStorage.getItem('simulated_sensors') || '{}');
@@ -71,27 +71,27 @@ export default function SensorForm({ initialData, onSuccess, onCancel }: any) {
       <h1 className="text-2xl font-bold text-[#1A4D2E] mb-6 text-center">
         {initialData ? "Modifier le capteur" : "Ajouter un nouveau capteur"}
       </h1>
-      
+
       <div className="bg-white rounded-[32px] p-8 shadow-sm border border-gray-100 w-full max-w-xl">
         <form onSubmit={handleSubmit} className="space-y-5">
-          
+
           <div>
             <label className="block text-sm font-bold mb-2 text-gray-700">Nom du capteur</label>
-            <input 
+            <input
               placeholder="Ex: Capteur Central"
               className="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-green-500 outline-none text-sm transition-all"
               value={formData.nom}
-              onChange={(e) => setFormData({...formData, nom: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-bold mb-2 text-gray-700">Type de mesure</label>
-            <select 
+            <select
               className="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-green-500 outline-none bg-white text-sm font-medium cursor-pointer"
               value={formData.typeMesure}
-              onChange={(e) => setFormData({...formData, typeMesure: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, typeMesure: e.target.value })}
               required
             >
               {/* Vos options identiques */}
@@ -120,10 +120,10 @@ export default function SensorForm({ initialData, onSuccess, onCancel }: any) {
 
           <div>
             <label className="block text-sm font-bold mb-2 text-gray-700">Parcelle associée</label>
-            <select 
+            <select
               className="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-green-500 outline-none bg-white text-sm cursor-pointer"
               value={formData.parcelleId}
-              onChange={(e) => setFormData({...formData, parcelleId: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, parcelleId: e.target.value })}
               required
             >
               <option value="">Sélectionner une parcelle</option>
@@ -134,13 +134,13 @@ export default function SensorForm({ initialData, onSuccess, onCancel }: any) {
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <button 
+            <button
               type="button" onClick={onCancel}
               className="px-6 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold text-sm hover:bg-gray-200"
             >
               Annuler
             </button>
-            <button 
+            <button
               type="submit" disabled={loading}
               className="px-8 py-2 bg-[#22C55E] text-white rounded-xl font-bold text-sm hover:bg-[#16A34A] shadow-md"
             >

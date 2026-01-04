@@ -1,14 +1,14 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { terrainService } from "@/services/terrainService";
+import { terrainService } from "../services/terrainService";
 
 const paysAfrique = [
-  "Afrique du Sud", "Algérie", "Angola", "Bénin", "Botswana", "Burkina Faso", "Burundi", 
-  "Cameroun", "Cap-Vert", "Comores", "Congo", "Côte d'Ivoire", "Djibouti", "Égypte", 
-  "Érythrée", "Eswatini", "Éthiopie", "Gabon", "Gambie", "Ghana", "Guinée", "Guinée équatoriale", 
-  "Kenya", "Lesotho", "Libéria", "Libye", "Madagascar", "Malawi", "Mali", "Maroc", "Maurice", 
-  "Mauritanie", "Mozambique", "Namibie", "Niger", "Nigeria", "Ouganda", "Rwanda", "Sénégal", 
-  "Seychelles", "Sierra Leone", "Somalie", "Soudan", "Soudan du Sud", "Tanzanie", "Tchad", 
+  "Afrique du Sud", "Algérie", "Angola", "Bénin", "Botswana", "Burkina Faso", "Burundi",
+  "Cameroun", "Cap-Vert", "Comores", "Congo", "Côte d'Ivoire", "Djibouti", "Égypte",
+  "Érythrée", "Eswatini", "Éthiopie", "Gabon", "Gambie", "Ghana", "Guinée", "Guinée équatoriale",
+  "Kenya", "Lesotho", "Libéria", "Libye", "Madagascar", "Malawi", "Mali", "Maroc", "Maurice",
+  "Mauritanie", "Mozambique", "Namibie", "Niger", "Nigeria", "Ouganda", "Rwanda", "Sénégal",
+  "Seychelles", "Sierra Leone", "Somalie", "Soudan", "Soudan du Sud", "Tanzanie", "Tchad",
   "Togo", "Tunisie", "Zambie", "Zimbabwe"
 ].sort();
 
@@ -18,10 +18,10 @@ export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState(initialData || {
-    nom: "", 
-    superficie: "", 
-    pays: "Cameroun", 
-    ville: "", 
+    nom: "",
+    superficie: "",
+    pays: "Cameroun",
+    ville: "",
     quartier: ""
   });
 
@@ -41,7 +41,7 @@ export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
     setLoading(true);
     try {
       await terrainService.saveTerrain(formData);
-      onSuccess(); 
+      onSuccess();
     } catch (error) {
       console.error("Erreur lors de l'enregistrement:", error);
     } finally {
@@ -54,16 +54,16 @@ export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
       <h2 className="text-3xl font-black text-[#1A4D2E] text-center mb-8">
         {initialData ? "Modifier le terrain" : "Nouveau Terrain"}
       </h2>
-      
+
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Champ Nom */}
         <div>
           <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Nom du terrain</label>
-          <input 
-            placeholder="Ex: Plantation Ouest" 
+          <input
+            placeholder="Ex: Plantation Ouest"
             className="w-full p-4 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
             value={formData.nom}
-            onChange={(e) => setFormData({...formData, nom: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
             required
           />
         </div>
@@ -71,12 +71,12 @@ export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
         {/* CHAMP RÉINTÉGRÉ : Superficie */}
         <div>
           <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Superficie (m²)</label>
-          <input 
-            type="number" 
-            placeholder="Ex: 500" 
+          <input
+            type="number"
+            placeholder="Ex: 500"
             className="w-full p-4 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
             value={formData.superficie}
-            onChange={(e) => setFormData({...formData, superficie: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, superficie: e.target.value })}
             required
           />
         </div>
@@ -85,7 +85,7 @@ export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
           {/* Liste Déroulante Pays (Orientation vers le bas) */}
           <div className="relative" ref={dropdownRef}>
             <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Pays</label>
-            <div 
+            <div
               onClick={() => setIsOpen(!isOpen)}
               className={`w-full p-4 border rounded-2xl bg-[#F9FBFA] cursor-pointer flex justify-between items-center transition-all ${isOpen ? 'border-[#22C55E] ring-1 ring-[#22C55E]' : 'border-gray-200'}`}
             >
@@ -99,11 +99,11 @@ export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
             {isOpen && (
               <div className="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl max-h-60 overflow-y-auto top-full left-0">
                 {paysAfrique.map((p) => (
-                  <div 
+                  <div
                     key={p}
                     className="p-4 hover:bg-green-50 cursor-pointer text-gray-700 font-medium border-b border-gray-50 last:border-0"
                     onClick={() => {
-                      setFormData({...formData, pays: p});
+                      setFormData({ ...formData, pays: p });
                       setIsOpen(false);
                     }}
                   >
@@ -117,11 +117,11 @@ export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
           {/* Champ Ville */}
           <div>
             <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Ville</label>
-            <input 
-              placeholder="Yaoundé" 
+            <input
+              placeholder="Yaoundé"
               className="w-full p-4 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
               value={formData.ville}
-              onChange={(e) => setFormData({...formData, ville: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, ville: e.target.value })}
               required
             />
           </div>
@@ -130,27 +130,27 @@ export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
         {/* Champ Quartier */}
         <div>
           <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Quartier</label>
-          <input 
-            placeholder="Melen" 
+          <input
+            placeholder="Melen"
             className="w-full p-4 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
             value={formData.quartier}
-            onChange={(e) => setFormData({...formData, quartier: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, quartier: e.target.value })}
             required
           />
         </div>
 
         {/* Actions */}
         <div className="flex gap-4 mt-10">
-          <button 
-            type="button" 
-            onClick={onCancel} 
+          <button
+            type="button"
+            onClick={onCancel}
             className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl font-bold hover:bg-gray-200 transition-all"
           >
             Annuler
           </button>
-          <button 
-            type="submit" 
-            disabled={loading} 
+          <button
+            type="submit"
+            disabled={loading}
             className="flex-[2] py-4 bg-[#22C55E] text-white rounded-2xl font-bold hover:bg-[#16A34A] shadow-lg shadow-green-100 transition-all disabled:opacity-50"
           >
             {loading ? "Chargement..." : initialData ? "Mettre à jour" : "Creer Terrain"}

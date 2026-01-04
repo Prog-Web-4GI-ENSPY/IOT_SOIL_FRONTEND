@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import DashboardHeader from '@/components/shared/Header';
-import DashboardFooter from '@/components/shared/Footer'; // Réintégré
-import { parcelService } from "@/services/parcelService";
-import { predictionService } from "@/services/predictionService";
+import DashboardHeader from '@/components/layout/Header';
+import DashboardFooter from '@/components/layout/Footer'; // Réintégré
+import { parcelService } from "@/features/parcels/services/parcelService";
+import { predictionService } from "@/features/predictions/services/predictionService";
 import { BrainCircuit, CheckCircle, ChevronDown, Loader2, Sparkles, Sprout } from "lucide-react";
 
 export default function PredictionsPage() {
@@ -72,7 +72,7 @@ export default function PredictionsPage() {
         <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 mb-8 transition-all hover:shadow-md">
           <label className="block text-[11px] font-black text-slate-400 mb-3 uppercase tracking-[0.2em]">Parcelle à analyser</label>
           <div className="relative">
-            <select 
+            <select
               value={selectedParcelId}
               onChange={(e) => handleSelectChange(e.target.value)}
               className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-slate-800 outline-none focus:border-[#22C55E] appearance-none transition-all cursor-pointer"
@@ -101,7 +101,7 @@ export default function PredictionsPage() {
                 <Sparkles className="w-5 h-5" />
                 <span className="text-sm font-black uppercase tracking-widest">Culture Recommandée</span>
               </div>
-              
+
               <div className="flex items-center gap-5 mb-8">
                 <div className="p-4 bg-green-100 rounded-3xl">
                   <Sprout className="w-10 h-10 text-green-600" />
@@ -115,14 +115,13 @@ export default function PredictionsPage() {
                 </p>
               </div>
 
-              <button 
+              <button
                 onClick={handleApply}
                 disabled={isApplied}
-                className={`w-full py-5 rounded-[24px] font-black text-xl shadow-lg transition-all flex items-center justify-center gap-3 ${
-                  isApplied 
-                  ? "bg-green-100 text-green-600" 
+                className={`w-full py-5 rounded-[24px] font-black text-xl shadow-lg transition-all flex items-center justify-center gap-3 ${isApplied
+                  ? "bg-green-100 text-green-600"
                   : "bg-[#1A4D2E] text-white hover:bg-[#22C55E] hover:-translate-y-1"
-                }`}
+                  }`}
               >
                 {isApplied ? (
                   <> <CheckCircle className="w-6 h-6" /> Appliquée avec succès </>

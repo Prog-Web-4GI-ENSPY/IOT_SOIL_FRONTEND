@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import LoginForm from '@/components/auth/LoginForm';
+import LoginForm from '@/features/auth/components/LoginForm';
 import { Suspense } from 'react';
 
 // Composant interne pour gérer les SearchParams (nécessaire pour Next.js 15+)

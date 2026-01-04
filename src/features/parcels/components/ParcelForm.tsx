@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { terrainService } from "@/services/terrainService";
-import { parcelService } from "@/services/parcelService";
+import { terrainService } from "@/features/terrains/services/terrainService";
+import { parcelService } from "../services/parcelService";
 
 export default function ParcelForm({ initialData, onSuccess, onCancel }: any) {
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ export default function ParcelForm({ initialData, onSuccess, onCancel }: any) {
     setError("");
 
     const superficieSaisie = Number(formData.superficie);
-    
+
     // 1. Empecher une superficie négative
     if (superficieSaisie <= 0) {
       setError("La superficie doit être un nombre positif.");
@@ -42,7 +42,7 @@ export default function ParcelForm({ initialData, onSuccess, onCancel }: any) {
       const surfaceOccupee = parcellesExistantes
         .filter(p => String(p.terrainId) === String(formData.terrainId) && p.id !== initialData?.id)
         .reduce((acc, p) => acc + Number(p.superficie), 0);
-      
+
       const surfaceDisponible = Number(terrainSelectionne.superficie) - surfaceOccupee;
 
       if (superficieSaisie > surfaceDisponible) {
@@ -66,7 +66,7 @@ export default function ParcelForm({ initialData, onSuccess, onCancel }: any) {
       <h2 className="text-2xl font-bold text-green-800 text-center mb-6">
         {initialData ? "Modifier la parcelle" : "Créer une parcelle"}
       </h2>
-      
+
       {error && (
         <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm font-bold">
           {error}
@@ -76,31 +76,31 @@ export default function ParcelForm({ initialData, onSuccess, onCancel }: any) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-bold mb-1">Nom</label>
-          <input 
+          <input
             placeholder="Ex: Parcelle Nord" className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-green-500"
             value={formData.nom}
-            onChange={(e) => setFormData({...formData, nom: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
             required
           />
         </div>
 
         <div>
           <label className="block text-sm font-bold mb-1">Superficie (m²)</label>
-          <input 
+          <input
             type="number" min="1" placeholder="Ex: 50" className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-green-500"
             value={formData.superficie}
-            onChange={(e) => setFormData({...formData, superficie: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, superficie: e.target.value })}
             required
           />
         </div>
 
         <div>
           <label className="block text-sm font-bold mb-1">Terrain associé</label>
-          <select 
+          <select
             disabled={!!initialData}
             className={`w-full p-3 border rounded-xl ${initialData ? 'bg-gray-200 cursor-not-allowed' : 'bg-gray-50'}`}
             value={formData.terrainId}
-            onChange={(e) => setFormData({...formData, terrainId: e.target.value})}
+            onChange={(e) => setFormData({ ...formData, terrainId: e.target.value })}
             required
           >
             <option value="">Sélectionner un terrain</option>

@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import DashboardHeader from '@/components/shared/Header';
-import { terrainService } from "@/services/terrainService";
-import { parcelService } from "@/services/parcelService";
+import DashboardHeader from '@/components/layout/Header';
+import DashboardFooter from '@/components/layout/Footer';
+import { terrainService } from "@/features/terrains/services/terrainService";
+import { parcelService } from "@/features/parcels/services/parcelService";
 import { LayoutGrid, Map as MapIcon, BrainCircuit, Lightbulb, History, ArrowRight } from "lucide-react";
 
 export default function FarmerDashboard() {
@@ -56,8 +57,8 @@ export default function FarmerDashboard() {
 
         {/* Grille des services avec statistiques intégrées */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          
-          <ActionCard 
+
+          <ActionCard
             icon={<MapIcon className="w-7 h-7 text-green-600" />}
             title="Mes Terrains"
             stats={[
@@ -69,7 +70,7 @@ export default function FarmerDashboard() {
             color="bg-green-50"
           />
 
-          <ActionCard 
+          <ActionCard
             icon={<LayoutGrid className="w-7 h-7 text-emerald-600" />}
             title="Mes Parcelles"
             stats={[
@@ -81,7 +82,7 @@ export default function FarmerDashboard() {
             color="bg-emerald-50"
           />
 
-          <ActionCard 
+          <ActionCard
             icon={<BrainCircuit className="w-7 h-7 text-orange-600" />}
             title="Prédictions IA"
             stats={[{ label: "Statut", value: "Analyses prêtes" }]}
@@ -91,7 +92,7 @@ export default function FarmerDashboard() {
             isFeatured
           />
 
-          <ActionCard 
+          <ActionCard
             icon={<Lightbulb className="w-7 h-7 text-yellow-600" />}
             title="Recommandations"
             stats={[{ label: "Alertes", value: "3 nouvelles" }]}
@@ -100,7 +101,7 @@ export default function FarmerDashboard() {
             color="bg-yellow-50"
           />
 
-          <ActionCard 
+          <ActionCard
             icon={<History className="w-7 h-7 text-blue-600" />}
             title="Historique Global"
             stats={[{ label: "Logs", value: "Journal complet" }]}
@@ -118,14 +119,14 @@ export default function FarmerDashboard() {
 
 function ActionCard({ icon, title, stats, description, onClick, color, isFeatured = false }: any) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`group relative text-left p-10 rounded-[40px] bg-white border border-slate-100 shadow-sm transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 overflow-hidden ${isFeatured ? 'ring-2 ring-orange-500/20' : ''}`}
     >
       <div className={`w-16 h-16 ${color} rounded-3xl flex items-center justify-center mb-8`}>
         {icon}
       </div>
-      
+
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-2xl font-bold text-slate-800">{title}</h3>
         <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-[#22C55E] group-hover:translate-x-1 transition-all" />
@@ -140,9 +141,9 @@ function ActionCard({ icon, title, stats, description, onClick, color, isFeature
           </div>
         ))}
       </div>
-      
+
       <p className="text-slate-500 leading-relaxed font-medium text-sm">{description}</p>
-      
+
       <div className={`absolute -bottom-6 -right-6 w-32 h-32 ${color} opacity-10 rounded-full transition-transform group-hover:scale-150`} />
     </button>
   );

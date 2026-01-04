@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
-import DashboardHeader from '@/components/shared/Header';
-import DashboardFooter from '@/components/shared/Footer';
-import ParcelForm from "@/components/dashboard/ParcelForm";
-import ParcelCard from "@/components/dashboard/ParcelCard"; // Import de la nouvelle carte
-import { parcelService } from "@/services/parcelService";
-import { terrainService } from "@/services/terrainService";
+import DashboardHeader from '@/components/layout/Header';
+import DashboardFooter from '@/components/layout/Footer';
+import ParcelCard from "@/features/parcels/components/ParcelCard";
+import ParcelForm from "@/features/parcels/components/ParcelForm";
+import { parcelService } from "@/features/parcels/services/parcelService";
+import { terrainService } from "@/features/terrains/services/terrainService";
 
 export default function ParcellesPage() {
   const [view, setView] = useState("list");
@@ -28,26 +28,26 @@ export default function ParcellesPage() {
     const loadData = async () => {
       // 1. Récupération des parcelles depuis l'API ou le service
       const data: any = await parcelService.getParcelles();
-      
+
       // 2. RÉCUPÉRATION DES DONNÉES SIMULÉES (La correction est ici)
       const capteursStockes = JSON.parse(localStorage.getItem('simulated_sensors') || '{}');
       const predictionsStockees = JSON.parse(localStorage.getItem('simulated_predictions') || '{}');
-  
+
       // 3. Fusion des données pour que la carte reçoive "capteursListe"
       const parcellesMisesAJour = data.map((p: any) => ({
         ...p,
-          azote: p.azote ?? 0,
-            phosphore: p.phosphore ?? 0,
-            potassium: p.potassium ?? 0,
-            humidite: p.humidite ?? 0,
-            temperature: p.temperature ?? 0,
-            ph: p.ph ?? 0,
+        azote: p.azote ?? 0,
+        phosphore: p.phosphore ?? 0,
+        potassium: p.potassium ?? 0,
+        humidite: p.humidite ?? 0,
+        temperature: p.temperature ?? 0,
+        ph: p.ph ?? 0,
         // On utilise la prédiction stockée ou celle par défaut
         culturePredite: predictionsStockees[p.id] || p.culturePredite,
         // On crée la chaîne de caractères que ParcelCard attend (image_74bdad)
         capteursListe: capteursStockes[p.id] ? capteursStockes[p.id].join(', ') : null
       }));
-  
+
       setParcelles(parcellesMisesAJour);
     };
     loadData();
@@ -118,12 +118,12 @@ export default function ParcellesPage() {
           <>
             <div className="flex justify-between items-center mb-10">
               <h1 className="text-3xl font-extrabold text-green-900">Mes Parcelles</h1>
-              <button 
-    onClick={() => { setSelectedParcel(null); setView("form"); }} 
-    className="bg-[#22C55E] text-white px-8 py-3 rounded-2xl font-bold shadow-lg hover:bg-[#16A34A] transition-all transform active:scale-95"
-  >
-    + Ajouter
-  </button>
+              <button
+                onClick={() => { setSelectedParcel(null); setView("form"); }}
+                className="bg-[#22C55E] text-white px-8 py-3 rounded-2xl font-bold shadow-lg hover:bg-[#16A34A] transition-all transform active:scale-95"
+              >
+                + Ajouter
+              </button>
             </div>
 
             {parcelles.length === 0 ? (
@@ -133,12 +133,12 @@ export default function ParcellesPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {parcelles.map(p => (
-                  <ParcelCard 
-                    key={p.id} 
-                    parcel={p} 
+                  <ParcelCard
+                    key={p.id}
+                    parcel={p}
                     terrainName={getTerrainName(p.terrainId)}
                     onEdit={() => { setSelectedParcel(p); setView("form"); }}
-                    onDelete={async () => { if(confirm("Supprimer ?")) { await parcelService.deleteParcelle(p.id); loadData(); } }}
+                    onDelete={async () => { if (confirm("Supprimer ?")) { await parcelService.deleteParcelle(p.id); loadData(); } }}
                   />
                 ))}
               </div>

@@ -7,6 +7,10 @@ export type User = {
     isActive: boolean;
     createdAt: string; // ISO date
     updatedAt?: string;
+
+    langue ? : "fr" | "en";
+    
+    
   };
  
 export type Parcelle = {
@@ -61,4 +65,6 @@ export type Terrain = {
     ville: string;
     quartier: string;
   };
-  
+export type langue = "fr" | "en";
+
+export type Role = "ADMIN" | "AGRICULTEUR" | "UTILISATEUR";

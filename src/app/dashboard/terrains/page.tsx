@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import DashboardHeader from '@/components/shared/Header';
-import DashboardFooter from '@/components/shared/Footer';
-import TerrainForm from "@/components/dashboard/TerrainForm";
-import { terrainService } from "@/services/terrainService";
+import DashboardHeader from '@/components/layout/Header';
+import DashboardFooter from '@/components/layout/Footer';
+import TerrainForm from "@/features/terrains/components/TerrainForm";
+import { terrainService } from "@/features/terrains/services/terrainService";
 
 export default function TerrainsPage() {
-  const [view, setView] = useState("list"); 
+  const [view, setView] = useState("list");
   const [terrains, setTerrains] = useState<any[]>([]);
   const [selectedTerrain, setSelectedTerrain] = useState(null);
 
@@ -36,10 +36,10 @@ export default function TerrainsPage() {
 
       <main className="flex-grow p-8 max-w-7xl mx-auto w-full">
         {view === "form" ? (
-          <TerrainForm 
-            initialData={selectedTerrain} 
-            onSuccess={loadData} 
-            onCancel={() => setView("list")} 
+          <TerrainForm
+            initialData={selectedTerrain}
+            onSuccess={loadData}
+            onCancel={() => setView("list")}
           />
         ) : (
           <>
@@ -47,11 +47,11 @@ export default function TerrainsPage() {
               <div>
                 <h1 className="text-3xl font-extrabold text-green-900">Mes Terrains</h1>
                 <p className="text-gray-500 font-medium">
-                  Total : <span className="text-green-600">{stats.count}</span> | 
+                  Total : <span className="text-green-600">{stats.count}</span> |
                   Surface : <span className="text-green-600">{stats.surface} m²</span>
                 </p>
               </div>
-              <button 
+              <button
                 onClick={() => { setSelectedTerrain(null); setView("form"); }}
                 className="bg-[#22C55E] text-white px-8 py-3 rounded-2xl font-bold hover:bg-[#16A34A] shadow-lg shadow-green-100 transition-all"
               >

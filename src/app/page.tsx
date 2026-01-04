@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import LanguageToggle from '@/components/shared/LanguageToggle';
+import LanguageToggle from '@/components/ui/LanguageToggle';
 import { useLanguageStore } from '@/store/useUserStore';
 
 interface Dictionary {
@@ -32,13 +32,13 @@ export default function WelcomePage() {
       {/* Background Image */}
       <div className="absolute inset-0 z-[-1]">
         <Image
-          src="/image.png" 
+          src="/image.png"
           alt="Champ"
           fill
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black/15 backdrop-blur-[1px]" /> 
+        <div className="absolute inset-0 bg-black/15 backdrop-blur-[1px]" />
       </div>
 
       {/* Header */}
@@ -49,11 +49,11 @@ export default function WelcomePage() {
       {/* Logo et Titre */}
       <div className="flex flex-col items-center gap-2">
         <div className="relative w-24 h-24 drop-shadow-2xl">
-          <Image 
-            src="/logo.jpg" 
-            alt="Smart Agro Logo" 
+          <Image
+            src="/logo.jpg"
+            alt="Smart Agro Logo"
             fill
-            className="object-contain" 
+            className="object-contain"
           />
         </div>
         <h1 className="text-5xl md:text-6xl font-extrabold text-white drop-shadow-md">
@@ -64,16 +64,16 @@ export default function WelcomePage() {
       {/* Boutons de sélection de rôle */}
       <div className="flex flex-col gap-6 w-full max-w-md px-6">
         {/* Lien vers Login Administrateur */}
-        <Link 
-          href="/login?role=admin" 
+        <Link
+          href="/login?role=admin"
           className="w-full bg-agro-bright hover:bg-agro-primary text-white font-bold py-4 rounded-xl shadow-lg transition-all text-center text-lg active:scale-95"
         >
           {dict.welcome.admin}
         </Link>
-        
+
         {/* Lien vers Login Agriculteur */}
-        <Link 
-          href="/login?role=agriculteur" 
+        <Link
+          href="/login?role=agriculteur"
           className="w-full bg-agro-bright hover:bg-agro-primary text-white font-bold py-4 rounded-xl shadow-lg transition-all text-center text-lg active:scale-95"
         >
           {dict.welcome.farmer}

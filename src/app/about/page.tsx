@@ -1,7 +1,7 @@
 "use client";
 
-import DashboardHeader from '@/components/shared/Header';
-import DashboardFooter from '@/components/shared/Footer';
+import DashboardHeader from '@/components/layout/Header';
+import DashboardFooter from '@/components/layout/Footer';
 import Link from 'next/link';
 
 export default function AboutUsPage() {
@@ -17,21 +17,21 @@ export default function AboutUsPage() {
 
       <main className="flex-grow">
         {/* SECTION HERO : L'image transmise est utilisée ici en background */}
-        <section 
+        <section
           className="relative h-[70vh] flex items-center justify-center bg-cover bg-center"
-          style={{ 
-            backgroundImage: `url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832')` 
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2832')`
           }}
         >
           {/* Overlay sombre pour faire ressortir le texte */}
           <div className="absolute inset-0 bg-black/40"></div>
-          
+
           <div className="relative z-10 text-center px-6 max-w-4xl">
             <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight">
               Cultiver l'Avenir
             </h1>
             <p className="text-xl md:text-2xl text-white/90 font-medium leading-relaxed">
-              Smart Agro combine la sagesse de la terre et la puissance de la technologie 
+              Smart Agro combine la sagesse de la terre et la puissance de la technologie
               pour une agriculture plus durable et performante.
             </p>
           </div>
@@ -50,7 +50,7 @@ export default function AboutUsPage() {
                   Notre objectif est de maximiser vos rendements tout en optimisant l'utilisation des ressources naturelles comme l'eau et les nutriments.
                 </p>
               </div>
-              
+
               <div className="bg-white p-8 rounded-[40px] shadow-xl border border-green-100">
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">

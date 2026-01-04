@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
-import RegisterForm from '@/components/auth/RegisterForm';
+import RegisterForm from '@/features/auth/components/RegisterForm';
 import { Suspense } from 'react';
 
 function RegisterContent() {
