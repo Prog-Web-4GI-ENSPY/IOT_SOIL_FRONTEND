@@ -3,13 +3,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import DashboardHeader from '@/components/layout/Header';
-import DashboardFooter from '@/components/layout/Footer';
 import { terrainService } from "@/features/terrains/services/terrainService";
 import { parcelService } from "@/features/parcels/services/parcelService";
+import { useTranslation } from "@/providers/TranslationProvider";
 import { LayoutGrid, Map as MapIcon, BrainCircuit, Lightbulb, History, ArrowRight } from "lucide-react";
 
 export default function FarmerDashboard() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [terrains, setTerrains] = useState<any[]>([]);
   const [parcelles, setParcelles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,10 +49,10 @@ export default function FarmerDashboard() {
         {/* Header Minimaliste */}
         <div className="mb-12">
           <h1 className="text-5xl font-black text-slate-900 tracking-tight">
-            Tableau de bord<span className="text-[#22C55E]">.</span>
+            {t('dashboard_home.title')}<span className="text-[#22C55E]">.</span>
           </h1>
           <p className="text-slate-500 font-medium mt-3 text-lg">
-            Gérez vos ressources et analysez vos performances agricoles.
+            {t('dashboard_home.subtitle')}
           </p>
         </div>
 
@@ -60,33 +61,33 @@ export default function FarmerDashboard() {
 
           <ActionCard
             icon={<MapIcon className="w-7 h-7 text-green-600" />}
-            title="Mes Terrains"
+            title={t('dashboard_home.my_terrains')}
             stats={[
-              { label: "Total", value: loading ? "..." : `${stats.nbTerrains}` },
-              { label: "Surface", value: loading ? "..." : `${stats.surfaceTerrains} m²` }
+              { label: t('dashboard_home.total'), value: loading ? "..." : `${stats.nbTerrains}` },
+              { label: t('dashboard_home.surface'), value: loading ? "..." : `${stats.surfaceTerrains} m²` }
             ]}
-            description="Accédez à la gestion complète de vos titres et emplacements."
+            description={t('dashboard_home.terrains_desc')}
             onClick={() => router.push('/dashboard/terrains')}
             color="bg-green-50"
           />
 
           <ActionCard
             icon={<LayoutGrid className="w-7 h-7 text-emerald-600" />}
-            title="Mes Parcelles"
+            title={t('dashboard_home.my_parcelles')}
             stats={[
-              { label: "Actives", value: loading ? "..." : `${stats.nbParcelles}` },
-              { label: "Surface", value: loading ? "..." : `${stats.surfaceParcelles} m²` }
+              { label: t('dashboard_home.active'), value: loading ? "..." : `${stats.nbParcelles}` },
+              { label: t('dashboard_home.surface'), value: loading ? "..." : `${stats.surfaceParcelles} m²` }
             ]}
-            description="Suivi de la santé des sols et des capteurs installés."
+            description={t('dashboard_home.parcelles_desc')}
             onClick={() => router.push('/dashboard/parcelles')}
             color="bg-emerald-50"
           />
 
           <ActionCard
             icon={<BrainCircuit className="w-7 h-7 text-orange-600" />}
-            title="Prédictions IA"
-            stats={[{ label: "Statut", value: "Analyses prêtes" }]}
-            description="Recommandations intelligentes basées sur vos relevés."
+            title={t('dashboard_home.ai_predictions')}
+            stats={[{ label: t('dashboard_home.status'), value: t('dashboard_home.analyses_ready') }]}
+            description={t('dashboard_home.predictions_desc')}
             onClick={() => router.push('/historiqueprediction')}
             color="bg-orange-50"
             isFeatured
@@ -94,25 +95,24 @@ export default function FarmerDashboard() {
 
           <ActionCard
             icon={<Lightbulb className="w-7 h-7 text-yellow-600" />}
-            title="Recommandations"
-            stats={[{ label: "Alertes", value: "3 nouvelles" }]}
-            description="Conseils techniques pour booster votre rendement."
+            title={t('dashboard_home.recommendations')}
+            stats={[{ label: t('dashboard_home.alerts'), value: `3 ${t('dashboard_home.new_alerts')}` }]}
+            description={t('dashboard_home.recommendations_desc')}
             onClick={() => router.push('/dashboard/recommandations')}
             color="bg-yellow-50"
           />
 
           <ActionCard
             icon={<History className="w-7 h-7 text-blue-600" />}
-            title="Historique Global"
-            stats={[{ label: "Logs", value: "Journal complet" }]}
-            description="Suivi chronologique de toutes vos actions passées."
+            title={t('dashboard_home.global_history')}
+            stats={[{ label: t('dashboard_home.logs'), value: t('dashboard_home.full_logs') }]}
+            description={t('dashboard_home.history_desc')}
             onClick={() => router.push('/dashboard/activites')}
             color="bg-blue-50"
           />
 
         </div>
       </main>
-      {/* Footer supprimé */}
     </div>
   );
 }
@@ -132,17 +132,14 @@ function ActionCard({ icon, title, stats, description, onClick, color, isFeature
         <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-[#22C55E] group-hover:translate-x-1 transition-all" />
       </div>
 
-      {/* Affichage des statistiques directement dans la carte */}
-      <div className="flex gap-4 mb-5">
-        {stats.map((s: any, i: number) => (
-          <div key={i} className="bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{s.label}</p>
-            <p className="text-sm font-black text-slate-700">{s.value}</p>
-          </div>
-        ))}
-      </div>
+      {stats.map((s: any, i: number) => (
+        <div key={i} className="inline-block bg-slate-50 px-3 py-1 rounded-lg border border-slate-100 mr-2 mb-2">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{s.label}</p>
+          <p className="text-sm font-black text-slate-700">{s.value}</p>
+        </div>
+      ))}
 
-      <p className="text-slate-500 leading-relaxed font-medium text-sm">{description}</p>
+      <p className="text-slate-500 leading-relaxed font-medium text-sm mt-4">{description}</p>
 
       <div className={`absolute -bottom-6 -right-6 w-32 h-32 ${color} opacity-10 rounded-full transition-transform group-hover:scale-150`} />
     </button>

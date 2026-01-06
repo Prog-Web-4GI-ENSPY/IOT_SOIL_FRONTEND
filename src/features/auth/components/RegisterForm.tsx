@@ -19,16 +19,25 @@ export default function RegisterForm({ role }: { role: string | null }) {
       {/* Barre de Progression */}
       <div className="w-full flex items-center justify-between mb-8 px-4 relative">
         <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 z-0"></div>
-        <div 
-          className="absolute top-1/2 left-0 h-1 bg-agro-bright -translate-y-1/2 z-0 transition-all duration-300" 
+        <div
+          className="absolute top-1/2 left-0 h-1 bg-agro-bright -translate-y-1/2 z-0 transition-all duration-300"
           style={{ width: step === 1 ? '50%' : '100%' }}
         ></div>
-        
+
         <div className={`z-10 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step >= 1 ? 'bg-agro-bright text-white' : 'bg-gray-200'}`}>1</div>
         <div className={`z-10 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step === 2 ? 'bg-agro-bright text-white' : 'bg-gray-200'}`}>2</div>
       </div>
 
-      <form className="w-full flex flex-col gap-4">
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          // Simulation inscription
+          localStorage.setItem('smartagro_user', JSON.stringify({ email: 'nouveau@user.com', role: isAdmin ? 'admin' : 'farmer' }));
+          localStorage.setItem('smartagro_token', 'simulated-jwt-token');
+          window.location.href = isAdmin ? '/dashboard/admin' : '/dashboard/farmer';
+        }}
+        className="w-full flex flex-col gap-4"
+      >
         {step === 1 ? (
           /* ÉTAPE 1 : Informations Personnelles */
           <>
@@ -44,8 +53,8 @@ export default function RegisterForm({ role }: { role: string | null }) {
               <label className="text-agro-primary font-bold text-sm ml-1">Tel</label>
               <input type="tel" placeholder="+237" className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 outline-none focus:border-agro-bright bg-gray-50/50" />
             </div>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setStep(2)}
               className="w-full bg-agro-bright hover:bg-agro-primary text-white font-bold py-3 rounded-full shadow-lg transition-all mt-4"
             >
@@ -67,17 +76,17 @@ export default function RegisterForm({ role }: { role: string | null }) {
               <label className="text-agro-primary font-bold text-sm ml-1">Confirmer mot de passe</label>
               <input type="password" placeholder="........" className="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 outline-none focus:border-agro-bright bg-gray-50/50" />
             </div>
-            
+
             <div className="flex gap-4 mt-4">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setStep(1)}
                 className="flex-1 bg-agro-primary text-white font-bold py-3 rounded-xl hover:opacity-90 transition-all"
               >
                 retour
               </button>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="flex-[2] bg-agro-bright text-white font-bold py-3 rounded-xl hover:opacity-90 transition-all shadow-lg"
               >
                 S'inscrire

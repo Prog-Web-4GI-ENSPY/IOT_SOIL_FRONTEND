@@ -1,7 +1,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/providers/TranslationProvider';
+import { User, LogOut } from 'lucide-react';
 
 export default function DashboardHeader() {
+  const { t } = useTranslation();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Ici on pourrait ajouter la logique de suppression de token si nécessaire
+    router.push('/login');
+  };
+
   return (
     <header className="w-full bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50">
       <div className="flex items-center gap-6 flex-1">
@@ -11,29 +22,34 @@ export default function DashboardHeader() {
         </div>
 
         <div className="relative w-full max-w-md hidden lg:block">
-          <input 
-            type="text" 
-            placeholder="Rechercher..." 
+          <input
+            type="text"
+            placeholder={t('nav.search')}
             className="w-full bg-[#E9F0EB] text-gray-600 text-sm py-2 px-4 rounded-lg border-none focus:ring-1 focus:ring-[#22C55E] outline-none transition-all placeholder:text-gray-400"
           />
         </div>
       </div>
-      
+
       <nav className="hidden xl:flex items-center gap-6 text-[13px] font-semibold text-gray-500 mx-4">
-        <Link href="/dashboard/farmer" className="hover:text-[#1B831B] transition-colors">Dashboard</Link>
-        <Link href="/dashboard/terrains" className="hover:text-[#1B831B] transition-colors">Terrains</Link>
-        <Link href="/dashboard/parcelles" className="hover:text-[#1B831B] transition-colors">Parcelles</Link>
-        {/* Redirection directe vers la création de capteur */}
-        <Link href="/dashboard/capteurs?action=new" className="hover:text-[#1B831B] transition-colors">Capteurs</Link>
-        <Link href="/dashboard/profil" className="hover:text-[#1B831B] flex items-center gap-1">
-           <span className="w-4 h-4 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px]">👤</span> Profil
+        <Link href="/dashboard/farmer" className="hover:text-[#1B831B] transition-colors">{t('nav.dashboard')}</Link>
+        <Link href="/dashboard/terrains" className="hover:text-[#1B831B] transition-colors">{t('nav.terrains')}</Link>
+        <Link href="/dashboard/parcelles" className="hover:text-[#1B831B] transition-colors">{t('nav.parcelles')}</Link>
+        <Link href="/dashboard/capteurs?action=new" className="hover:text-[#1B831B] transition-colors">{t('nav.sensors')}</Link>
+        <Link href="/dashboard/profil" className="hover:text-[#1B831B] flex items-center gap-2">
+          <User className="w-4 h-4 text-gray-600" />
+          {t('nav.profile')}
         </Link>
-        <Link href="/about" className="hover:text-[#1B831B] transition-colors">About Us</Link>
       </nav>
 
-      <button className="bg-[#22C55E] hover:bg-[#1B831B] text-white px-5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95 ml-4">
-        Deconnexion
-      </button>
+      <div className="flex items-center gap-4">
+        <button
+          onClick={handleLogout}
+          className="bg-[#22C55E] hover:bg-[#1B831B] text-white px-5 py-2 rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95 ml-2 flex items-center gap-2"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          {t('nav.logout')}
+        </button>
+      </div>
     </header>
   );
 }

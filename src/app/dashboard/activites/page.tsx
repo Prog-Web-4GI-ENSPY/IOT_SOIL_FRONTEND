@@ -1,8 +1,10 @@
 "use client";
 import DashboardHeader from '@/components/layout/Header';
-import { Calendar, PlusCircle, RefreshCw, Trash2, Microscope } from "lucide-react";
+import { useTranslation } from '@/providers/TranslationProvider';
+import { Calendar, PlusCircle, RefreshCw, Microscope } from "lucide-react";
 
 export default function ActivitesPage() {
+  const { t } = useTranslation();
   // Exemple de données d'activités (à remplacer par un appel API)
   const activites = [
     { id: 1, type: 'create', icon: <PlusCircle className="text-green-500" />, text: "Nouveau terrain 'Zone Ouest' créé", date: "02 Janv 2026", heure: "14:30" },
@@ -14,7 +16,7 @@ export default function ActivitesPage() {
     <div className="min-h-screen bg-[#F8FAFC]">
       <DashboardHeader />
       <main className="p-8 max-w-4xl mx-auto">
-        <h1 className="text-3xl font-black text-slate-900 mb-8">Journal d'activités</h1>
+        <h1 className="text-3xl font-black text-slate-900 mb-8">{t('activities.title')}</h1>
 
         <div className="space-y-6">
           {activites.map((act) => (

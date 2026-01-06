@@ -41,9 +41,13 @@ export default function LoginForm({ role }: LoginFormProps) {
     try {
       // Ici tu ajouteras ton appel API (ex: fetch('/api/login', ...))
       console.log("Connexion en cours...", { email, role });
-      
+
       // Simulation d'un délai réseau
       await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // --- SIMULATION AUTH ---
+      localStorage.setItem('smartagro_user', JSON.stringify({ email, role: isAdmin ? 'admin' : 'farmer' }));
+      localStorage.setItem('smartagro_token', 'simulated-jwt-token');
 
       // Redirection selon le rôle
       router.push(isAdmin ? '/dashboard/admin' : '/dashboard/farmer');
@@ -58,12 +62,12 @@ export default function LoginForm({ role }: LoginFormProps) {
     <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 md:p-10 w-full max-w-md flex flex-col items-center border border-gray-100 animate-in fade-in zoom-in duration-500">
       {/* Logo Smart Agro */}
       <div className="mb-4">
-        <Image 
-          src="/logo.jpg" 
-          alt="Smart Agro Logo" 
-          width={50} 
-          height={50} 
-          className="object-contain" 
+        <Image
+          src="/logo.jpg"
+          alt="Smart Agro Logo"
+          width={50}
+          height={50}
+          className="object-contain"
         />
       </div>
 
@@ -80,9 +84,9 @@ export default function LoginForm({ role }: LoginFormProps) {
         {/* Champ Email */}
         <div className="flex flex-col gap-1">
           <label className="text-agro-primary font-bold ml-1 text-sm">Email</label>
-          <input 
+          <input
             name="email"
-            type="email" 
+            type="email"
             required
             placeholder="votre adresse email"
             className="w-full border-2 border-gray-100 rounded-2xl px-4 py-3 focus:border-agro-bright outline-none transition-all bg-gray-50/50 placeholder:text-gray-300"
@@ -92,9 +96,9 @@ export default function LoginForm({ role }: LoginFormProps) {
         {/* Champ Mot de Passe */}
         <div className="flex flex-col gap-1">
           <label className="text-agro-primary font-bold ml-1 text-sm">Mot de Passe</label>
-          <input 
+          <input
             name="password"
-            type="password" 
+            type="password"
             required
             placeholder="........"
             className="w-full border-2 border-gray-100 rounded-2xl px-4 py-3 focus:border-agro-bright outline-none transition-all bg-gray-50/50 placeholder:text-gray-300"
@@ -105,9 +109,9 @@ export default function LoginForm({ role }: LoginFormProps) {
         {isAdmin && (
           <div className="flex flex-col gap-1 animate-in slide-in-from-top-2 duration-300">
             <label className="text-red-600 font-bold ml-1 text-sm">Code de Sécurité Administrateur</label>
-            <input 
+            <input
               name="adminCode"
-              type="password" 
+              type="password"
               required
               placeholder="Code secret"
               className="w-full border-2 border-red-50 rounded-2xl px-4 py-3 focus:border-red-500 outline-none transition-all bg-red-50/30 placeholder:text-red-200"
@@ -116,7 +120,7 @@ export default function LoginForm({ role }: LoginFormProps) {
         )}
 
         {/* Bouton Se Connecter */}
-        <button 
+        <button
           type="submit"
           disabled={loading}
           className="w-full bg-agro-bright hover:bg-agro-primary text-white font-bold py-4 rounded-full shadow-lg transition-all mt-4 text-lg active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
@@ -128,16 +132,16 @@ export default function LoginForm({ role }: LoginFormProps) {
       {/* Liens de bas de page */}
       <div className="w-full flex justify-between mt-8 text-xs text-agro-primary/60 font-semibold px-2">
         {/* LIEN MODIFIÉ : On passe le rôle actuel dans l'URL */}
-  <Link 
-    href={`/forgot-password?role=${role}`} 
-    title="Récupérer mon compte" 
-    className="hover:text-agro-primary transition-colors"
-  >
-    Mot de passe oublié ?
-  </Link>
-        <Link 
-          href={`/register?role=${role}`} 
-          title="Créer un compte" 
+        <Link
+          href={`/forgot-password?role=${role}`}
+          title="Récupérer mon compte"
+          className="hover:text-agro-primary transition-colors"
+        >
+          Mot de passe oublié ?
+        </Link>
+        <Link
+          href={`/register?role=${role}`}
+          title="Créer un compte"
           className="hover:text-agro-primary transition-colors"
         >
           Créer un compte

@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import DashboardHeader from '@/components/layout/Header';
 import DashboardFooter from '@/components/layout/Footer';
 import { parcelService } from "@/features/parcels/services/parcelService";
+import { useTranslation } from "@/providers/TranslationProvider";
 
 export default function PredictionsListPage() {
+  const { t } = useTranslation();
   const [predictions, setPredictions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -13,17 +15,10 @@ export default function PredictionsListPage() {
     const loadPredictions = async () => {
       setLoading(true);
       try {
-        /** * --- FUTUR CÔTÉ BACKEND (À décommenter plus tard) ---
-         * const response = await predictionService.getHistory();
-         * setPredictions(response); 
-         */
-
-        // --- CÔTÉ SIMULATION (LocalStorage) ---
         const allParcelles: any = await parcelService.getParcelles();
         const iaSimu = JSON.parse(localStorage.getItem('simulated_predictions') || '{}');
 
-        // On simule une date (Aujourd'hui) pour les besoins de la démo
-        const dateAujourdhui = new Date().toLocaleDateString('fr-FR', {
+        const dateAujourdhui = new Date().toLocaleDateString(t('welcome.lang') === 'FR' ? 'fr-FR' : 'en-US', {
           day: '2-digit',
           month: 'long',
           year: 'numeric'
@@ -35,7 +30,7 @@ export default function PredictionsListPage() {
             id: p.id,
             nomParcelle: p.nom,
             culture: iaSimu[String(p.id)],
-            date: dateAujourdhui // Sera remplacé par p.date_analyse via le backend
+            date: dateAujourdhui
           }));
 
         setPredictions(filteredList);
@@ -47,7 +42,7 @@ export default function PredictionsListPage() {
     };
 
     loadPredictions();
-  }, []);
+  }, [t]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F1F8F4]">
@@ -56,11 +51,11 @@ export default function PredictionsListPage() {
       <main className="flex-grow p-8 max-w-5xl mx-auto w-full">
         <div className="mb-10 flex justify-between items-end">
           <div>
-            <h1 className="text-3xl font-black text-[#1A4D2E]">Historique des Analyses</h1>
-            <p className="text-gray-500 font-medium">Suivi temporel des recommandations IA</p>
+            <h1 className="text-3xl font-black text-[#1A4D2E]">{t('history.title')}</h1>
+            <p className="text-gray-500 font-medium">{t('history.subtitle')}</p>
           </div>
           <div className="text-right">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total</span>
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('history.total')}</span>
             <p className="text-2xl font-black text-[#1A4D2E]">{predictions.length}</p>
           </div>
         </div>
@@ -71,16 +66,16 @@ export default function PredictionsListPage() {
           </div>
         ) : predictions.length === 0 ? (
           <div className="bg-white p-16 rounded-[40px] text-center border border-gray-100 shadow-sm">
-            <p className="text-gray-400 text-lg font-medium">Aucune analyse n'a encore été effectuée.</p>
+            <p className="text-gray-400 text-lg font-medium">{t('history.no_analysis')}</p>
           </div>
         ) : (
           <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Date d'analyse</th>
-                  <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Parcelle</th>
-                  <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">Culture Recommandée</th>
+                  <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">{t('history.date_column')}</th>
+                  <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">{t('history.parcel_column')}</th>
+                  <th className="px-8 py-5 text-xs font-bold text-gray-400 uppercase tracking-wider">{t('history.culture_column')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">

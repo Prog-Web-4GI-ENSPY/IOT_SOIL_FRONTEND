@@ -1,9 +1,153 @@
 {
-    "welcome": {
-      "title": "Smart Agro",
-      "admin": "Administrateur",
-      "farmer": "Agriculteur",
-      "slogan": "\"Le sol parle. Nous écoutons\"",
-      "lang": "FR"
-    }
+  "welcome": {
+    "title": "Smart Agro",
+    "lang": "FR"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "terrains": "Terrains",
+    "parcelles": "Parcelles",
+    "sensors": "Capteurs",
+    "profile": "Profil",
+    "about": "À propos",
+    "login": "Connexion",
+    "logout": "Déconnexion"
+  },
+  "dashboard_home": {
+    "title": "Tableau de bord",
+    "subtitle": "Gérez vos ressources et analysez vos performances agricoles.",
+    "my_terrains": "Mes Terrains",
+    "terrains_desc": "Accédez à la gestion complète de vos titres et emplacements.",
+    "my_parcelles": "Mes Parcelles",
+    "parcelles_desc": "Suivi de la santé des sols et des capteurs installés.",
+    "ai_predictions": "Prédictions IA",
+    "predictions_desc": "Recommandations intelligentes basées sur vos relevés.",
+    "recommendations": "Recommandations",
+    "recommendations_desc": "Conseils techniques pour booster votre rendement.",
+    "global_history": "Historique Global",
+    "history_desc": "Suivi chronologique de toutes vos actions passées.",
+    "total": "Total",
+    "surface": "Surface",
+    "active": "Actives",
+    "status": "Statut",
+    "alerts": "Alertes",
+    "logs": "Logs",
+    "analyses_ready": "Analyses prêtes",
+    "new_alerts": "nouvelles",
+    "full_logs": "Journal complet"
+  },
+  "terrains": {
+    "title": "Mes Terrains",
+    "add_button": "Ajouter",
+    "total": "Total",
+    "surface": "Surface",
+    "no_terrains": "Pas de terrain pour l'instant",
+    "superficie": "Superficie",
+    "modify": "Modifier",
+    "delete": "Supprimer",
+    "delete_confirm": "Voulez-vous supprimer ce terrain ?"
+  },
+  "parcelles_list": {
+    "title": "Mes Parcelles",
+    "add_button": "Ajouter",
+    "no_parcelles": "Pas de parcelle pour l'instant",
+    "delete_confirm": "Supprimer ?",
+    "analysis_ongoing": "Analyse en cours",
+    "no_sensor": "Aucun capteur"
+  },
+  "history": {
+    "title": "Historique des Analyses",
+    "subtitle": "Suivi temporel des recommandations IA",
+    "total": "Total",
+    "no_analysis": "Aucune analyse n'a encore été effectuée.",
+    "date_column": "Date d'analyse",
+    "parcel_column": "Parcelle",
+    "culture_column": "Culture Recommandée"
+  },
+  "activities": {
+    "title": "Journal d'activités"
+  },
+  "profile_page": {
+    "title": "Profil",
+    "edit": "Modifier le profil",
+    "save": "Enregistrer les modifications",
+    "cancel": "Annuler",
+    "info": "Mes Informations",
+    "nom": "Nom complet",
+    "email": "Adresse Email",
+    "tel": "Téléphone",
+    "pass": "Nouveau mot de passe",
+    "confirmPass": "Confirmer mot de passe",
+    "success": "Profil mis à jour !",
+    "langLabel": "Langue"
+  },
+  "landing": {
+    "hero_title": "Cultiver l'Avenir",
+    "hero_subtitle": "Smart Agro combine la sagesse de la terre et la puissance de la technologie pour une agriculture plus durable et performante.",
+    "mission_title": "Notre Mission",
+    "mission_p1": "Chez <strong>Smart Agro</strong>, nous pensons que chaque agriculteur mérite d'avoir une vision précise de ses cultures. En utilisant des capteurs IoT de pointe et des algorithmes d'IA, nous transformons les données du sol en décisions concrètes.",
+    "mission_p2": "Notre objectif est de maximiser vos rendements tout en optimisant l'utilisation des ressources naturelles comme l'eau et les nutriments.",
+    "features": {
+      "sustainability_title": "Durabilité",
+      "sustainability_desc": "Préserver le sol pour les générations futures.",
+      "iot_title": "Innovation IoT",
+      "iot_desc": "Suivi en temps réel de vos parcelles.",
+      "ai_title": "Intelligence Artificielle",
+      "ai_desc": "Prédictions précises pour chaque type de culture."
+    },
+    "team_title": "Notre équipe",
+    "cta_title": "Prêt à optimiser vos cultures ?",
+    "cta_button": "Commencer maintenant"
+  },
+  "roles": {
+    "agronomist": "Agronome & Fondatrice",
+    "engineer": "Ingénieur IA",
+    "product_manager": "Responsable produit"
+  },
+  "footer": {
+    "desc": "La plateforme intelligente qui combine IoT, IA pour maximiser vos rendements tout en préservant l'environnement.",
+    "nav_title": "Navigation",
+    "my_terrains": "Mes Terrains",
+    "iot_sensors": "Capteur IoT",
+    "my_parcels": "Mes parcelles",
+    "ai_prediction": "Prediction IA",
+    "recommendation": "Recommandation",
+    "support_title": "Support",
+    "help_center": "Centre d'aide",
+    "documentation": "Documentation",
+    "contact_agronomist": "Contact agronome",
+    "service_status": "Statut du service",
+    "stay_informed": "Restez informé",
+    "newsletter_desc": "Alertes météo, conseils culturaux et nouveautés Smart Agro.",
+    "email_placeholder": "Votre email",
+    "subscribe": "S'abonner",
+    "rights": "© 2025 Smart Agro – Tous droits réservés.",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Confidentialité",
+    "legal": "Mentions légales"
+  },
+  "predictions": {
+    "title": "Assistant IA",
+    "subtitle": "Analyse intelligente de vos sols",
+    "select_parcel": "Parcelle à analyser",
+    "choose_parcel": "Choisir une parcelle...",
+    "currently": "Actuellement",
+    "calculating": "Calcul du rendement optimal...",
+    "recommended_culture": "Culture Recommandée",
+    "confirm_culture": "Confirmer cette culture",
+    "applied_success": "Appliquée avec succès",
+    "select_zone_message": "Veuillez sélectionner une zone pour démarrer l'analyse.",
+    "no_parcels": "Aucune parcelle trouvée"
+  },
+  "recommandations": {
+    "title": "Chat Expert IA",
+    "subtitle": "Posez vos questions sur vos cultures en temps réel.",
+    "culture_label": "Culture",
+    "select_parcel_prompt": "Sélectionnez une zone pour discuter...",
+    "start_consultation": "Choisissez une parcelle pour commencer la consultation avec nos agents.",
+    "no_prediction_error": "Aucune culture prédite pour cette parcelle. Veuillez passer par l'Assistant IA d'abord.",
+    "input_placeholder": "Écrivez votre question ici...",
+    "user_label": "Moi",
+    "select_parcel": "Parcelle pour chat"
   }
+}

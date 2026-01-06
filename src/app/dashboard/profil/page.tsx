@@ -1,42 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, EyeOff, Camera, CheckCircle2, Globe } from "lucide-react";
+import { Eye, EyeOff, Camera, CheckCircle2 } from "lucide-react";
 import DashboardHeader from '@/components/layout/Header';
 import DashboardFooter from '@/components/layout/Footer';
 import { authService } from "@/features/auth/services/authService";
-import { langue, Role } from "@/types/user";
+import { langue } from "@/types/user";
+import { useLanguageStore } from '@/store/useUserStore';
+import { useTranslation } from '@/providers/TranslationProvider';
 
-const translations = {
-  fr: {
-    edit: "Modifier le profil",
-    save: "Enregistrer les modifications",
-    cancel: "Annuler",
-    info: "Mes Informations",
-    nom: "Nom complet",
-    email: "Adresse Email",
-    tel: "Téléphone",
-    ferme: "Nom de l'exploitation",
-    pass: "Nouveau mot de passe",
-    confirmPass: "Confirmer mot de passe",
-    success: "Profil mis à jour !",
-    langLabel: "Langue"
-  },
-  en: {
-    edit: "Edit Profile",
-    save: "Save Changes",
-    cancel: "Cancel",
-    info: "My Information",
-    nom: "Full Name",
-    email: "Email Address",
-    tel: "Phone",
-    ferme: "Farm Name",
-    pass: "New Password",
-    confirmPass: "Confirm Password",
-    success: "Profile updated!",
-    langLabel: "Language"
-  }
-};
 export type UserData = {
   id: number,
   email: string,
@@ -44,18 +16,21 @@ export type UserData = {
   role: string,
   phone: string,
   isActive: boolean,
-  createdAt: string,// ISO date
+  createdAt: string,
   updatedAt: string,
   langue: langue,
   password: string,
   confirmPassword: string
 };
+
 export default function ProfilPage() {
+  const { lang, setLang } = useLanguageStore();
+  const { t } = useTranslation();
+
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [langue, setLangue] = useState<langue>('fr');
 
   const [userData, setUserData] = useState({
     id: 1,
@@ -64,25 +39,21 @@ export default function ProfilPage() {
     role: "ADMIN",
     phone: "656616751",
     isActive: false,
-    createdAt: "02/23/34",// ISO date
-    updatedAt: "02/01/12",
-    langue: langue,
-    password: "xxxxxxxxx",
-    confirmPassword: "xxxxxxxx"
+    createdAt: "2026-01-01",
+    updatedAt: "2026-01-01",
+    langue: lang,
+    password: "",
+    confirmPassword: ""
   });
 
-  // Accès facile aux traductions selon la langue sélectionnée
-  const t = translations[userData.langue];
-
   useEffect(() => {
-    const savedLang = localStorage.getItem('app_lang') as "fr" | "en";
-    if (savedLang) setUserData(prev => ({ ...prev, langue: savedLang }));
-  }, []);
+    setUserData(prev => ({ ...prev, langue: lang }));
+  }, [lang]);
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLang = e.target.value as "fr" | "en";
+    setLang(newLang);
     setUserData({ ...userData, langue: newLang });
-    localStorage.setItem('app_lang', newLang);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -90,21 +61,12 @@ export default function ProfilPage() {
     setLoading(true);
 
     try {
-      // Envoi des données vers le service (Backend + LocalStorage)
       const result = await authService.updateProfile(userData);
 
       if (result.success) {
-        // Sauvegarde spécifique de la langue
-        localStorage.setItem('app_lang', userData.langue);
-
         setIsEditing(false);
         setShowSuccess(true);
-
-        // On cache le message de succès après 3 secondes
         setTimeout(() => setShowSuccess(false), 3000);
-
-        // Optionnel : rafraîchir pour mettre à jour le Header
-        // window.location.reload(); 
       }
     } catch (error) {
       alert("Une erreur est survenue lors de l'enregistrement.");
@@ -113,6 +75,7 @@ export default function ProfilPage() {
       setLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f8fbf8]">
       <DashboardHeader />
@@ -123,7 +86,7 @@ export default function ProfilPage() {
           {showSuccess && (
             <div className="fixed top-24 right-6 bg-[#1A4D2E] text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 z-50 animate-in fade-in slide-in-from-right-5">
               <CheckCircle2 className="text-[#CCFF00]" />
-              <span className="font-bold">{t.success}</span>
+              <span className="font-bold">{t('profile_page.success')}</span>
             </div>
           )}
 
@@ -133,7 +96,8 @@ export default function ProfilPage() {
             <div className="lg:col-span-1">
               <div className="bg-[#1A4D2E] rounded-[32px] p-10 text-center shadow-lg border border-white/10">
                 <div className="relative inline-block group">
-                  <div className="w-24 h-24 rounded-full border-4 border-[#1A4D2E] mx-auto mb-4 flex items-center justify-center text-3xl font-black text-white bg-[#22C55E] shadow-xl">                   {userData.name.charAt(0)}
+                  <div className="w-24 h-24 rounded-full border-4 border-[#1A4D2E] mx-auto mb-4 flex items-center justify-center text-3xl font-black text-white bg-[#22C55E] shadow-xl">
+                    {userData.name.charAt(0)}
                   </div>
                   {isEditing && (
                     <div className="absolute bottom-0 right-0 bg-white p-2 rounded-full border-4 border-[#1A4D2E] cursor-pointer shadow-lg">
@@ -149,7 +113,7 @@ export default function ProfilPage() {
                     onClick={() => setIsEditing(true)}
                     className="w-full bg-[#22C55E] text-white py-3 rounded-xl font-bold hover:bg-[#1a9d4a] transition-all shadow-md"
                   >
-                    {t.edit}
+                    {t('profile_page.edit')}
                   </button>
                 ) : (
                   <div className="space-y-2">
@@ -157,13 +121,13 @@ export default function ProfilPage() {
                       onClick={handleSave}
                       className="w-full bg-[#22C55E] text-white py-3 rounded-xl font-bold shadow-lg hover:bg-[#1a9d4a] transition-all"
                     >
-                      {loading ? "..." : t.save}
+                      {loading ? "..." : t('profile_page.save')}
                     </button>
                     <button
                       onClick={() => setIsEditing(false)}
                       className="w-full bg-white/10 text-white py-2 rounded-xl text-sm font-medium hover:bg-white/20 transition-all"
                     >
-                      {t.cancel}
+                      {t('profile_page.cancel')}
                     </button>
                   </div>
                 )}
@@ -175,13 +139,13 @@ export default function ProfilPage() {
               <div className="bg-white rounded-[32px] p-8 lg:p-10 shadow-sm border border-gray-100">
                 <div className="flex justify-between items-center mb-8">
                   <h3 className="text-[#1A4D2E] text-lg font-black uppercase tracking-tight">
-                    {t.info}
+                    {t('profile_page.info')}
                   </h3>
 
-                  {/* SELECT DE LANGUE DÉROULANT (Toujours modifiable) */}
+                  {/* SELECT DE LANGUE DÉROULANT */}
                   <div className="relative flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-xl border border-gray-200">
                     <select
-                      value={userData.langue}
+                      value={lang}
                       onChange={handleLanguageChange}
                       className="bg-transparent text-xs font-bold text-[#1A4D2E] outline-none cursor-pointer appearance-none pr-4"
                     >
@@ -193,21 +157,21 @@ export default function ProfilPage() {
 
                 <form className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ProfileInput label={t.nom} value={userData.name} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, name: v })} />
-                    <ProfileInput label={t.email} value={userData.email} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, email: v })} />
-                    <ProfileInput label={t.tel} value={userData.phone} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, phone: v })} />
+                    <ProfileInput label={t('profile_page.nom')} value={userData.name} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, name: v })} />
+                    <ProfileInput label={t('profile_page.email')} value={userData.email} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, email: v })} />
+                    <ProfileInput label={t('profile_page.tel')} value={userData.phone} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, phone: v })} />
                   </div>
 
                   {isEditing && (
                     <div className="pt-6 border-t border-gray-50 space-y-6 animate-in slide-in-from-top-2">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
                         <div className="relative">
-                          <ProfileInput label={t.pass} value={userData.password} isEditing={true} type={showPass ? "text" : "password"} onChange={(v: string) => setUserData({ ...userData, password: v })} />
+                          <ProfileInput label={t('profile_page.pass')} value={userData.password} isEditing={true} type={showPass ? "text" : "password"} onChange={(v: string) => setUserData({ ...userData, password: v })} />
                           <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-4 top-9 text-gray-400">
                             {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                           </button>
                         </div>
-                        <ProfileInput label={t.confirmPass} value={userData.confirmPassword} isEditing={true} type={showPass ? "text" : "password"} onChange={(v: string) => setUserData({ ...userData, confirmPassword: v })} />
+                        <ProfileInput label={t('profile_page.confirmPass')} value={userData.confirmPassword} isEditing={true} type={showPass ? "text" : "password"} onChange={(v: string) => setUserData({ ...userData, confirmPassword: v })} />
                       </div>
                     </div>
                   )}
