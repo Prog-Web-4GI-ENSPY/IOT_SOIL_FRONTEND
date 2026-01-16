@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { AuthenticationService } from "@/lib/services/AuthenticationService";
 
 interface LoginFormProps {
   role: string | null;
@@ -24,8 +25,8 @@ export default function LoginForm({ role }: LoginFormProps) {
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email');
-    const password = formData.get('password');
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
     const adminCode = formData.get('adminCode');
 
     // 1. Validation du code fixe pour l'administrateur
@@ -37,22 +38,23 @@ export default function LoginForm({ role }: LoginFormProps) {
       }
     }
 
-    // 2. Simulation de la logique d'authentification
+    // 2. Logique d'authentification réelle
     try {
-      // Ici tu ajouteras ton appel API (ex: fetch('/api/login', ...))
-      console.log("Connexion en cours...", { email, role });
+      const response = await AuthenticationService.loginApiV1AuthLoginPost({
+        email,
+        password,
+      });
 
-      // Simulation d'un délai réseau
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // --- SIMULATION AUTH ---
-      localStorage.setItem('smartagro_user', JSON.stringify({ email, role: isAdmin ? 'admin' : 'farmer' }));
-      localStorage.setItem('smartagro_token', 'simulated-jwt-token');
+      // Stockage du token et des infos utilisateur
+      localStorage.setItem('smartagro_token', response.access_token);
+      localStorage.setItem('smartagro_user', JSON.stringify(response.user));
 
       // Redirection selon le rôle
+      // Note: On pourrait aussi vérifier response.user.role si disponible
       router.push(isAdmin ? '/dashboard/admin' : '/dashboard/farmer');
-    } catch (err) {
-      setError("Une erreur est survenue lors de la connexion.");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setError(err.body?.message || "Une erreur est survenue lors de la connexion. Vérifiez vos identifiants.");
     } finally {
       setLoading(false);
     }

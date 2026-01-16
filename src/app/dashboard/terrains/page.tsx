@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import DashboardHeader from '@/components/layout/Header';
 import DashboardFooter from '@/components/layout/Footer';
 import TerrainForm from "@/features/terrains/components/TerrainForm";
-import { terrainService } from "@/features/terrains/services/terrainService";
+import { TerrainsService } from "@/lib/services/TerrainsService";
 import { useTranslation } from "@/providers/TranslationProvider";
 
 export default function TerrainsPage() {
@@ -13,22 +13,30 @@ export default function TerrainsPage() {
   const [selectedTerrain, setSelectedTerrain] = useState(null);
 
   const loadData = async () => {
-    const data: any = await terrainService.getTerrains();
-    setTerrains(data);
-    setView("list");
+    try {
+      const data = await TerrainsService.getAllTerrainsApiV1TerrainsTerrainsGet();
+      setTerrains(data);
+      setView("list");
+    } catch (error) {
+      console.error("Error loading terrains:", error);
+    }
   };
 
   useEffect(() => { loadData(); }, []);
 
   const stats = useMemo(() => {
-    const totalSurface = terrains.reduce((acc, t) => acc + Number(t.superficie || 0), 0);
+    const totalSurface = terrains.reduce((acc, t) => acc + Number(t.superficie_totale || t.superficie || 0), 0);
     return { count: terrains.length, surface: totalSurface };
   }, [terrains]);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm(t('terrains.delete_confirm'))) {
-      await terrainService.deleteTerrain(id);
-      loadData();
+      try {
+        await TerrainsService.deleteTerrainApiV1TerrainsTerrainsTerrainIdDelete(id);
+        loadData();
+      } catch (error) {
+        console.error("Error deleting terrain:", error);
+      }
     }
   };
 

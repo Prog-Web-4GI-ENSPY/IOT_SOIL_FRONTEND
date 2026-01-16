@@ -16,7 +16,7 @@ export default function RegisterPage() {
     <main className="relative min-h-screen w-full flex items-center justify-center p-4">
       <div className="absolute inset-0 z-[-1]">
         <Image src="/image.png" alt="Background" fill className="object-cover" priority />
-        <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-black/5" />
       </div>
 
       <Suspense fallback={<div className="text-white">Chargement...</div>}>

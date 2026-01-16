@@ -11,7 +11,8 @@
     "profile": "Profile",
     "about": "About Us",
     "login": "Login",
-    "logout": "Logout"
+    "logout": "Logout",
+    "search": "Search..."
   },
   "dashboard_home": {
     "title": "Dashboard",
@@ -73,7 +74,8 @@
     "save": "Save Changes",
     "cancel": "Cancel",
     "info": "My Information",
-    "nom": "Full Name",
+    "nom": "Last Name",
+    "prenom": "First Name",
     "email": "Email Address",
     "tel": "Phone",
     "pass": "New Password",

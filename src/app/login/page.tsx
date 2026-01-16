@@ -25,7 +25,7 @@ export default function LoginPage() {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-black/5" />
       </div>
 
       {/* Utilisation de Suspense car useSearchParams est utilisé côté client */}

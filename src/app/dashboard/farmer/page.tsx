@@ -3,8 +3,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import DashboardHeader from '@/components/layout/Header';
-import { terrainService } from "@/features/terrains/services/terrainService";
-import { parcelService } from "@/features/parcels/services/parcelService";
+import { TerrainsService } from "@/lib/services/TerrainsService";
+import { ParcellesService } from "@/lib/services/ParcellesService";
 import { useTranslation } from "@/providers/TranslationProvider";
 import { LayoutGrid, Map as MapIcon, BrainCircuit, Lightbulb, History, ArrowRight } from "lucide-react";
 
@@ -19,12 +19,16 @@ export default function FarmerDashboard() {
     const loadAllData = async () => {
       try {
         setLoading(true);
-        const [terrainData, parcelData]: any = await Promise.all([
-          terrainService.getTerrains(),
-          parcelService.getParcelles()
-        ]);
+        // Fetch terrains
+        const terrainData = await TerrainsService.getAllTerrainsApiV1TerrainsTerrainsGet();
         setTerrains(terrainData);
-        setParcelles(parcelData);
+
+        // Fetch parcelles for each terrain
+        const allParcellesPromises = terrainData.map(t =>
+          ParcellesService.getParcellesByTerrainApiV1ParcellesParcellesTerrainTerrainIdGet(t.id)
+        );
+        const allParcellesResults = await Promise.all(allParcellesPromises);
+        setParcelles(allParcellesResults.flat());
       } catch (error) {
         console.error("Erreur de chargement:", error);
       } finally {
@@ -36,7 +40,7 @@ export default function FarmerDashboard() {
 
   const stats = useMemo(() => ({
     nbTerrains: terrains.length,
-    surfaceTerrains: terrains.reduce((acc, t) => acc + Number(t.superficie || 0), 0),
+    surfaceTerrains: terrains.reduce((acc, t) => acc + Number(t.superficie_totale || t.superficie || 0), 0),
     nbParcelles: parcelles.length,
     surfaceParcelles: parcelles.reduce((acc, p) => acc + Number(p.superficie || 0), 0)
   }), [terrains, parcelles]);
@@ -88,7 +92,7 @@ export default function FarmerDashboard() {
             title={t('dashboard_home.ai_predictions')}
             stats={[{ label: t('dashboard_home.status'), value: t('dashboard_home.analyses_ready') }]}
             description={t('dashboard_home.predictions_desc')}
-            onClick={() => router.push('/historiqueprediction')}
+            onClick={() => router.push('/dashboard/historiqueprediction')}
             color="bg-orange-50"
             isFeatured
           />

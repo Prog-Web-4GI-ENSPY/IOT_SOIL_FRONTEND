@@ -1,28 +1,40 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { terrainService } from "../services/terrainService";
+import { TerrainsService } from "@/lib/services/TerrainsService";
+import { LocalitSService } from "@/lib/services/LocalitSService";
+import { TypeTerrain } from "@/lib/models/TypeTerrain";
+import { StatutTerrain } from "@/lib/models/StatutTerrain";
+import { ChevronDown, MapPin, Ruler, Mountain, Calendar, Info } from "lucide-react";
 
-const paysAfrique = [
-  "Afrique du Sud", "Algérie", "Angola", "Bénin", "Botswana", "Burkina Faso", "Burundi",
-  "Cameroun", "Cap-Vert", "Comores", "Congo", "Côte d'Ivoire", "Djibouti", "Égypte",
-  "Érythrée", "Eswatini", "Éthiopie", "Gabon", "Gambie", "Ghana", "Guinée", "Guinée équatoriale",
-  "Kenya", "Lesotho", "Libéria", "Libye", "Madagascar", "Malawi", "Mali", "Maroc", "Maurice",
-  "Mauritanie", "Mozambique", "Namibie", "Niger", "Nigeria", "Ouganda", "Rwanda", "Sénégal",
-  "Seychelles", "Sierra Leone", "Somalie", "Soudan", "Soudan du Sud", "Tanzanie", "Tchad",
-  "Togo", "Tunisie", "Zambie", "Zimbabwe"
-].sort();
+// Retiré : paysAfrique
 
 export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [formData, setFormData] = useState(initialData || {
+  const [localites, setLocalites] = useState<any[]>([]);
+
+  const [formData, setFormData] = useState(initialData ? {
+    nom: initialData.nom,
+    superficie: initialData.superficie_totale || initialData.superficie,
+    type_terrain: initialData.type_terrain || TypeTerrain.AGRICOLE,
+    localite_id: initialData.localite_id || "",
+    description: initialData.description || "",
+    perimetre: initialData.perimetre || "",
+    pente: initialData.pente || "",
+    date_acquisition: initialData.date_acquisition ? new Date(initialData.date_acquisition).toISOString().split('T')[0] : "",
+    statut: initialData.statut || StatutTerrain.ACTIF
+  } : {
     nom: "",
     superficie: "",
-    pays: "Cameroun",
-    ville: "",
-    quartier: ""
+    type_terrain: TypeTerrain.AGRICOLE,
+    localite_id: "",
+    description: "",
+    perimetre: "",
+    pente: "",
+    date_acquisition: "",
+    statut: StatutTerrain.ACTIF
   });
 
   // Gestion du clic extérieur pour fermer la liste
@@ -36,14 +48,52 @@ export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const fetchLocalites = async () => {
+      try {
+        const data = await LocalitSService.getAllLocalitesApiV1LocalitesLocalitesGet();
+        setLocalites(data);
+      } catch (error) {
+        console.error("Error fetching localites:", error);
+      }
+    };
+    fetchLocalites();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await terrainService.saveTerrain(formData);
+      const localiteId = formData.localite_id;
+      if (!localiteId) {
+        throw new Error("Veuillez sélectionner une localité.");
+      }
+
+      const terrainData = {
+        nom: formData.nom,
+        superficie_totale: Number(formData.superficie),
+        type_terrain: formData.type_terrain,
+        localite_id: localiteId,
+        latitude: 0,
+        longitude: 0,
+        description: formData.description || null,
+        perimetre: formData.perimetre ? Number(formData.perimetre) : null,
+        pente: formData.pente ? Number(formData.pente) : null,
+        date_acquisition: formData.date_acquisition || null,
+      };
+
+      if (initialData?.id) {
+        await TerrainsService.updateTerrainApiV1TerrainsTerrainsTerrainIdPut(initialData.id, {
+          ...terrainData,
+          statut: formData.statut
+        });
+      } else {
+        await TerrainsService.createTerrainApiV1TerrainsTerrainsPost(terrainData);
+      }
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de l'enregistrement:", error);
+      alert(error.body?.detail || error.message || "Erreur lors de la sauvegarde.");
     } finally {
       setLoading(false);
     }
@@ -69,74 +119,112 @@ export default function TerrainForm({ initialData, onSuccess, onCancel }: any) {
         </div>
 
         {/* CHAMP RÉINTÉGRÉ : Superficie */}
-        <div>
-          <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Superficie (m²)</label>
-          <input
-            type="number"
-            placeholder="Ex: 500"
-            className="w-full p-4 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
-            value={formData.superficie}
-            onChange={(e) => setFormData({ ...formData, superficie: e.target.value })}
-            required
-          />
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Superficie (m²)</label>
+            <div className="relative">
+              <input
+                type="number"
+                placeholder="Ex: 500"
+                className="w-full p-4 pl-12 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
+                value={formData.superficie}
+                onChange={(e) => setFormData({ ...formData, superficie: e.target.value })}
+                required
+              />
+              <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Périmètre (m)</label>
+            <div className="relative">
+              <input
+                type="number"
+                placeholder="Optionnel"
+                className="w-full p-4 pl-12 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
+                value={formData.perimetre}
+                onChange={(e) => setFormData({ ...formData, perimetre: e.target.value })}
+              />
+              <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 rotate-90" />
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-6">
-          {/* Liste Déroulante Pays (Orientation vers le bas) */}
-          <div className="relative" ref={dropdownRef}>
-            <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Pays</label>
-            <div
-              onClick={() => setIsOpen(!isOpen)}
-              className={`w-full p-4 border rounded-2xl bg-[#F9FBFA] cursor-pointer flex justify-between items-center transition-all ${isOpen ? 'border-[#22C55E] ring-1 ring-[#22C55E]' : 'border-gray-200'}`}
-            >
-              <span className="text-gray-700">{formData.pays}</span>
-              <svg className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-
-            {/* Le menu s'affiche ici, toujours en dessous du bouton */}
-            {isOpen && (
-              <div className="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl max-h-60 overflow-y-auto top-full left-0">
-                {paysAfrique.map((p) => (
-                  <div
-                    key={p}
-                    className="p-4 hover:bg-green-50 cursor-pointer text-gray-700 font-medium border-b border-gray-50 last:border-0"
-                    onClick={() => {
-                      setFormData({ ...formData, pays: p });
-                      setIsOpen(false);
-                    }}
-                  >
-                    {p}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Champ Ville */}
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Ville</label>
-            <input
-              placeholder="Yaoundé"
-              className="w-full p-4 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
-              value={formData.ville}
-              onChange={(e) => setFormData({ ...formData, ville: e.target.value })}
-              required
-            />
+            <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Pente (%)</label>
+            <div className="relative">
+              <input
+                type="number"
+                placeholder="Ex: 5"
+                className="w-full p-4 pl-12 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
+                value={formData.pente}
+                onChange={(e) => setFormData({ ...formData, pente: e.target.value })}
+              />
+              <Mountain className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Date d'acquisition</label>
+            <div className="relative">
+              <input
+                type="date"
+                className="w-full p-4 pl-12 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
+                value={formData.date_acquisition}
+                onChange={(e) => setFormData({ ...formData, date_acquisition: e.target.value })}
+              />
+              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            </div>
           </div>
         </div>
 
-        {/* Champ Quartier */}
+        {initialData && (
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Statut du terrain</label>
+            <select
+              className="w-full p-4 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all appearance-none cursor-pointer"
+              value={formData.statut}
+              onChange={(e) => setFormData({ ...formData, statut: e.target.value as StatutTerrain })}
+            >
+              {Object.values(StatutTerrain).map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
-          <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Quartier</label>
-          <input
-            placeholder="Melen"
-            className="w-full p-4 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all"
-            value={formData.quartier}
-            onChange={(e) => setFormData({ ...formData, quartier: e.target.value })}
-            required
-          />
+          <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Description</label>
+          <div className="relative">
+            <textarea
+              placeholder="Informations complémentaires sur le terrain..."
+              className="w-full p-4 pl-12 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all min-h-[100px]"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+            <Info className="absolute left-4 top-5 w-5 h-5 text-gray-400" />
+          </div>
+        </div>
+
+        {/* Choix de la Localité */}
+        <div>
+          <label className="block text-sm font-bold mb-2 text-gray-700 ml-1">Localité</label>
+          <div className="relative">
+            <select
+              className="w-full p-4 pl-12 border border-gray-200 rounded-2xl bg-[#F9FBFA] outline-none focus:border-[#22C55E] transition-all appearance-none cursor-pointer"
+              value={formData.localite_id}
+              onChange={(e) => setFormData({ ...formData, localite_id: e.target.value })}
+              required
+            >
+              <option value="">Sélectionner une localité</option>
+              {localites.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.pays} - {l.ville} ({l.quartier})
+                </option>
+              ))}
+            </select>
+            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          </div>
         </div>
 
         {/* Actions */}

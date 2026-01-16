@@ -11,7 +11,8 @@
     "profile": "Profil",
     "about": "À propos",
     "login": "Connexion",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "search": "Rechercher..."
   },
   "dashboard_home": {
     "title": "Tableau de bord",
@@ -73,7 +74,8 @@
     "save": "Enregistrer les modifications",
     "cancel": "Annuler",
     "info": "Mes Informations",
-    "nom": "Nom complet",
+    "nom": "Nom",
+    "prenom": "Prénom",
     "email": "Adresse Email",
     "tel": "Téléphone",
     "pass": "Nouveau mot de passe",

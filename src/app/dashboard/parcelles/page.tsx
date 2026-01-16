@@ -4,8 +4,8 @@ import DashboardHeader from '@/components/layout/Header';
 import DashboardFooter from '@/components/layout/Footer';
 import ParcelCard from "@/features/parcels/components/ParcelCard";
 import ParcelForm from "@/features/parcels/components/ParcelForm";
-import { parcelService } from "@/features/parcels/services/parcelService";
-import { terrainService } from "@/features/terrains/services/terrainService";
+import { ParcellesService } from "@/lib/services/ParcellesService";
+import { TerrainsService } from "@/lib/services/TerrainsService";
 import { useTranslation } from "@/providers/TranslationProvider";
 
 export default function ParcellesPage() {
@@ -16,39 +16,26 @@ export default function ParcellesPage() {
   const [selectedParcel, setSelectedParcel] = useState(null);
 
   const loadData = async () => {
-    const [pData, tData]: any = await Promise.all([
-      parcelService.getParcelles(),
-      terrainService.getTerrains()
-    ]);
-    setParcelles(pData);
-    setTerrains(tData);
-    setView("list");
+    try {
+      const terrainsData = await TerrainsService.getAllTerrainsApiV1TerrainsTerrainsGet();
+      setTerrains(terrainsData);
+
+      const allParcellesPromises = terrainsData.map(t =>
+        ParcellesService.getParcellesByTerrainApiV1ParcellesParcellesTerrainTerrainIdGet(t.id)
+      );
+
+      const allParcellesResults = await Promise.all(allParcellesPromises);
+      const flattenedParcelles = allParcellesResults.flat();
+
+      setParcelles(flattenedParcelles);
+      setView("list");
+    } catch (error) {
+      console.error("Error loading parcelles data:", error);
+    }
   };
 
   useEffect(() => {
-    const loadAllData = async () => {
-      const data: any = await parcelService.getParcelles();
-      const tData: any = await terrainService.getTerrains();
-      setTerrains(tData);
-
-      const capteursStockes = JSON.parse(localStorage.getItem('simulated_sensors') || '{}');
-      const predictionsStockees = JSON.parse(localStorage.getItem('simulated_predictions') || '{}');
-
-      const parcellesMisesAJour = data.map((p: any) => ({
-        ...p,
-        azote: p.azote ?? 0,
-        phosphore: p.phosphore ?? 0,
-        potassium: p.potassium ?? 0,
-        humidite: p.humidite ?? 0,
-        temperature: p.temperature ?? 0,
-        ph: p.ph ?? 0,
-        culturePredite: predictionsStockees[p.id] || p.culturePredite,
-        capteursListe: capteursStockes[p.id] ? capteursStockes[p.id].join(', ') : null
-      }));
-
-      setParcelles(parcellesMisesAJour);
-    };
-    loadAllData();
+    loadData();
   }, []);
 
   const getTerrainName = (id: string | number) => {
@@ -86,7 +73,12 @@ export default function ParcellesPage() {
                     parcel={p}
                     terrainName={getTerrainName(p.terrainId)}
                     onEdit={() => { setSelectedParcel(p); setView("form"); }}
-                    onDelete={async () => { if (confirm(t('parcelles_list.delete_confirm'))) { await parcelService.deleteParcelle(p.id); loadData(); } }}
+                    onDelete={async () => {
+                      if (confirm(t('parcelles_list.delete_confirm'))) {
+                        await ParcellesService.deleteParcelleApiV1ParcellesParcellesParcelleIdDelete(p.id);
+                        loadData();
+                      }
+                    }}
                   />
                 ))}
               </div>

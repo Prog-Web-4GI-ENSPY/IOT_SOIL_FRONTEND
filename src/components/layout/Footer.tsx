@@ -19,7 +19,7 @@ export default function DashboardFooter() {
             <li><Link href="/dashboard/farmer/terrains" className="hover:text-white transition-colors">{t('footer.my_terrains')}</Link></li>
             <li><Link href="/dashboard/capteurs" className="hover:text-white transition-colors">{t('footer.iot_sensors')}</Link></li>
             <li><Link href="/dashboard/parcelles" className="hover:text-white transition-colors">{t('footer.my_parcels')}</Link></li>
-            <li><Link href="/predictions" className="hover:text-white transition-colors">{t('footer.ai_prediction')}</Link></li>
+            <li><Link href="/dashboard/predictions" className="hover:text-white transition-colors">{t('footer.ai_prediction')}</Link></li>
             <li><Link href="/dashboard/farmer/parcelles" className="hover:text-white transition-colors">{t('footer.recommendation')}</Link></li>
           </ul>
         </div>

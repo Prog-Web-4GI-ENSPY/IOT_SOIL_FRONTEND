@@ -1,21 +1,41 @@
 "use client";
 import { useState, useEffect } from "react";
-import { sensorService } from "../services/sensorService";
-import { parcelService } from "@/features/parcels/services/parcelService";
+import { CapteursService } from "@/lib/services/CapteursService";
+import { ParcellesService } from "@/lib/services/ParcellesService";
+import { TerrainsService } from "@/lib/services/TerrainsService";
+import { Calendar, Tag, Activity, Cpu } from "lucide-react";
 
 export default function SensorForm({ initialData, onSuccess, onCancel }: any) {
   const [loading, setLoading] = useState(false);
   const [parcellesExistantes, setParcellesExistantes] = useState<any[]>([]);
-  const [formData, setFormData] = useState(initialData || {
+  const [formData, setFormData] = useState(initialData ? {
+    nom: initialData.nom,
+    code: initialData.code || "",
+    parcelle_id: initialData.parcelle_id || initialData.parcelleId || "",
+    dev_eui: initialData.dev_eui || "",
+    date_installation: initialData.date_installation ? new Date(initialData.date_installation).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+    date_activation: initialData.date_activation ? new Date(initialData.date_activation).toISOString().split('T')[0] : ""
+  } : {
     nom: "",
-    typeMesure: "Humidité du sol (h)",
-    parcelleId: ""
+    code: "pH du sol", // On réutilise le type de mesure comme code
+    parcelle_id: "",
+    dev_eui: "",
+    date_installation: new Date().toISOString().split('T')[0],
+    date_activation: ""
   });
 
   useEffect(() => {
     const loadParcelles = async () => {
-      const data: any = await parcelService.getParcelles();
-      setParcellesExistantes(data);
+      try {
+        const terrains = await TerrainsService.getAllTerrainsApiV1TerrainsTerrainsGet();
+        const allParcellesPromises = terrains.map(t =>
+          ParcellesService.getParcellesByTerrainApiV1ParcellesParcellesTerrainTerrainIdGet(t.id)
+        );
+        const allParcellesResults = await Promise.all(allParcellesPromises);
+        setParcellesExistantes(allParcellesResults.flat());
+      } catch (error) {
+        console.error("Error loading parcelles for sensor form:", error);
+      }
     };
     loadParcelles();
   }, []);
@@ -25,42 +45,30 @@ export default function SensorForm({ initialData, onSuccess, onCancel }: any) {
     setLoading(true);
 
     try {
-      // 1. APPEL BACKEND (Commenté si vous simulez)
-      await sensorService.saveSensor(formData);
-
-      const currentSensors = JSON.parse(localStorage.getItem('smartagro_sensors_list') || '[]');
-
-      const newSensor = {
-        ...formData,
-        id: Date.now() // On génère un ID pour que la liste puisse l'afficher
-      };
-
-      currentSensors.push(newSensor);
-      localStorage.setItem('smartagro_sensors_list', JSON.stringify(currentSensors));
-
-      // 2. LOGIQUE DE SIMULATION LOCALSTORAGE (Indispensable pour la mise à jour de la carte)
-      const associationsStockees = JSON.parse(localStorage.getItem('simulated_sensors') || '{}');
-      const idParcelle = String(formData.parcelleId);
-
-      if (!associationsStockees[idParcelle]) {
-        associationsStockees[idParcelle] = [];
+      if (initialData?.id) {
+        await CapteursService.updateCapteurApiV1CapteursCapteurIdPut(initialData.id, {
+          nom: formData.nom,
+          parcelle_id: formData.parcelle_id || null,
+          dev_eui: formData.dev_eui || null,
+          date_installation: formData.date_installation || null,
+          date_activation: formData.date_activation || null,
+        });
+      } else {
+        await CapteursService.createCapteurApiV1CapteursPost({
+          nom: formData.nom,
+          code: formData.code,
+          parcelle_id: formData.parcelle_id || null,
+          dev_eui: formData.dev_eui || Math.random().toString(16).slice(2, 18).padStart(16, '0'),
+          date_installation: formData.date_installation || new Date().toISOString(),
+          date_activation: formData.date_activation || null,
+        });
       }
 
-      // On ajoute le nom du capteur s'il n'est pas déjà présent
-      if (!associationsStockees[idParcelle].includes(formData.nom)) {
-        associationsStockees[idParcelle].push(formData.nom);
-      }
-
-      localStorage.setItem('simulated_sensors', JSON.stringify(associationsStockees));
-
-      // 3. Succès
-      setTimeout(() => {
-        setLoading(false);
-        onSuccess(); // Retour à la liste ou redirection
-      }, 500);
-
-    } catch (error) {
-      console.error("Erreur lors de la sauvegarde:", error);
+      setLoading(false);
+      onSuccess();
+    } catch (error: any) {
+      console.error("Erreur lors de la sauvegarde du capteur:", error);
+      alert(error.body?.detail || "Erreur lors de la sauvegarde.");
       setLoading(false);
     }
   };
@@ -87,11 +95,11 @@ export default function SensorForm({ initialData, onSuccess, onCancel }: any) {
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2 text-gray-700">Type de mesure</label>
+            <label className="block text-sm font-bold mb-2 text-gray-700">Type de mesure (Code)</label>
             <select
               className="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-green-500 outline-none bg-white text-sm font-medium cursor-pointer"
-              value={formData.typeMesure}
-              onChange={(e) => setFormData({ ...formData, typeMesure: e.target.value })}
+              value={formData.code}
+              onChange={(e) => setFormData({ ...formData, code: e.target.value })}
               required
             >
               {/* Vos options identiques */}
@@ -122,8 +130,8 @@ export default function SensorForm({ initialData, onSuccess, onCancel }: any) {
             <label className="block text-sm font-bold mb-2 text-gray-700">Parcelle associée</label>
             <select
               className="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-green-500 outline-none bg-white text-sm cursor-pointer"
-              value={formData.parcelleId}
-              onChange={(e) => setFormData({ ...formData, parcelleId: e.target.value })}
+              value={formData.parcelle_id}
+              onChange={(e) => setFormData({ ...formData, parcelle_id: e.target.value })}
               required
             >
               <option value="">Sélectionner une parcelle</option>
@@ -131,6 +139,49 @@ export default function SensorForm({ initialData, onSuccess, onCancel }: any) {
                 <option key={p.id} value={p.id}>{p.nom}</option>
               ))}
             </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold mb-2 text-gray-700">Date d'installation</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  className="w-full p-3 pl-10 border-2 border-gray-100 rounded-xl focus:border-green-500 outline-none text-sm transition-all"
+                  value={formData.date_installation}
+                  onChange={(e) => setFormData({ ...formData, date_installation: e.target.value })}
+                  required
+                />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-bold mb-2 text-gray-700">Date d'activation</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  className="w-full p-3 pl-10 border-2 border-gray-100 rounded-xl focus:border-green-500 outline-none text-sm transition-all"
+                  value={formData.date_activation}
+                  onChange={(e) => setFormData({ ...formData, date_activation: e.target.value })}
+                />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold mb-2 text-gray-700">DevEUI LoRaWAN</label>
+            <div className="relative">
+              <input
+                placeholder="Ex: 1234567890ABCDEF"
+                className="w-full p-3 pl-10 border-2 border-gray-100 rounded-xl focus:border-green-500 outline-none text-sm transition-all font-mono"
+                value={formData.dev_eui}
+                onChange={(e) => setFormData({ ...formData, dev_eui: e.target.value })}
+                required
+                maxLength={16}
+              />
+              <Cpu className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

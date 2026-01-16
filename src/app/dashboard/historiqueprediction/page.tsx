@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import DashboardHeader from '@/components/layout/Header';
 import DashboardFooter from '@/components/layout/Footer';
-import { parcelService } from "@/features/parcels/services/parcelService";
+import { RecommandationsService } from "@/lib/services/RecommandationsService";
+import { ParcellesService } from "@/lib/services/ParcellesService";
+import { TerrainsService } from "@/lib/services/TerrainsService";
 import { useTranslation } from "@/providers/TranslationProvider";
 
 export default function PredictionsListPage() {
@@ -15,25 +17,32 @@ export default function PredictionsListPage() {
     const loadPredictions = async () => {
       setLoading(true);
       try {
-        const allParcelles: any = await parcelService.getParcelles();
-        const iaSimu = JSON.parse(localStorage.getItem('simulated_predictions') || '{}');
+        // Fetch all parcelles to map IDs to names
+        const terrains = await TerrainsService.getAllTerrainsApiV1TerrainsTerrainsGet();
+        const allParcellesPromises = terrains.map(t =>
+          ParcellesService.getParcellesByTerrainApiV1ParcellesParcellesTerrainTerrainIdGet(t.id)
+        );
+        const allParcellesResults = await Promise.all(allParcellesPromises);
+        const parcelles = allParcellesResults.flat();
 
-        const dateAujourdhui = new Date().toLocaleDateString(t('welcome.lang') === 'FR' ? 'fr-FR' : 'en-US', {
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric'
+        // Fetch recommendations history
+        const history = await RecommandationsService.getAllRecommendationsApiV1RecommendationsGet();
+
+        const mappedList = history.map((rec: any) => {
+          const parcel = parcelles.find(p => p.id === rec.parcelle_id);
+          return {
+            id: rec.id,
+            nomParcelle: parcel?.nom || "Parcelle inconnue",
+            culture: rec.culture_predite || "Inconnu",
+            date: new Date(rec.created_at).toLocaleDateString(t('welcome.lang') === 'FR' ? 'fr-FR' : 'en-US', {
+              day: '2-digit',
+              month: 'long',
+              year: 'numeric'
+            })
+          };
         });
 
-        const filteredList = allParcelles
-          .filter((p: any) => iaSimu[String(p.id)])
-          .map((p: any) => ({
-            id: p.id,
-            nomParcelle: p.nom,
-            culture: iaSimu[String(p.id)],
-            date: dateAujourdhui
-          }));
-
-        setPredictions(filteredList);
+        setPredictions(mappedList);
       } catch (error) {
         console.error("Erreur chargement prédictions:", error);
       } finally {

@@ -35,7 +35,7 @@ export default function LandingPage() {
                     }}
                 >
                     {/* Overlay */}
-                    <div className="absolute inset-0 bg-black/40"></div>
+                    <div className="absolute inset-0 bg-black/20"></div>
 
                     <div className="relative z-10 text-center px-6 max-w-4xl">
                         <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight">

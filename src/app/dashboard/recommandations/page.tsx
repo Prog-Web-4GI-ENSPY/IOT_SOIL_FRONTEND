@@ -3,8 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import DashboardHeader from '@/components/layout/Header';
 import DashboardFooter from '@/components/layout/Footer';
-import { parcelService } from "@/features/parcels/services/parcelService";
-import { recommendationService } from "@/features/recommendations/services/recommendationService";
+import { ParcellesService } from "@/lib/services/ParcellesService";
+import { TerrainsService } from "@/lib/services/TerrainsService";
+import { RecommandationsService } from "@/lib/services/RecommandationsService";
+import { DonnEsDeCapteursService } from "@/lib/services/DonnEsDeCapteursService";
 import { useTranslation } from "@/providers/TranslationProvider";
 import { Bot, User, Loader2, Send, Sparkles, AlertCircle, MapPin, ChevronRight } from "lucide-react";
 
@@ -12,6 +14,7 @@ export default function RecommandationsPage() {
   const { t } = useTranslation();
   const [parcelles, setParcelles] = useState<any[]>([]);
   const [selectedParcel, setSelectedParcel] = useState<any>(null);
+  const [latestSoilData, setLatestSoilData] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
@@ -25,9 +28,15 @@ export default function RecommandationsPage() {
   useEffect(() => {
     const loadParcelles = async () => {
       try {
-        const data: any = await parcelService.getParcelles();
-        setParcelles(data);
-      } catch (e) { console.error(e); }
+        const terrains = await TerrainsService.getAllTerrainsApiV1TerrainsTerrainsGet();
+        const allParcellesPromises = terrains.map(t =>
+          ParcellesService.getParcellesByTerrainApiV1ParcellesParcellesTerrainTerrainIdGet(t.id)
+        );
+        const allParcellesResults = await Promise.all(allParcellesPromises);
+        setParcelles(allParcellesResults.flat());
+      } catch (e) {
+        console.error("Error loading parcelles:", e);
+      }
     };
     loadParcelles();
   }, []);
@@ -39,19 +48,53 @@ export default function RecommandationsPage() {
 
     setSelectedParcel(parcel);
     setMessages([]);
+    setLoading(true);
 
-    if (parcel && (parcel.culturePredite || parcel.culture)) {
-      setLoading(true);
-      try {
-        const res: any = await recommendationService.getRecommendations(parcel.id, parcel.culturePredite || parcel.culture);
-        setMessages(res);
-      } finally { setLoading(false); }
+    try {
+      // Get latest soil data for the parcel
+      const measurements = await DonnEsDeCapteursService.getMeasurementsByParcelleApiV1SensorDataSensorDataParcelleParcelleIdGet(parcel.id, 0, 1);
+      const latest = measurements[0];
+
+      if (latest) {
+        const soilData = {
+          N: latest.azote || 0,
+          P: latest.phosphore || 0,
+          K: latest.potassium || 0,
+          temperature: latest.temperature || 0,
+          humidity: latest.humidity || 0,
+          ph: latest.ph || 0
+        };
+        setLatestSoilData(soilData);
+
+        const res = await RecommandationsService.predictCropUnifiedApiV1RecommendationsPredictCropPost({
+          soil_data: soilData,
+          parcelle_id: parcel.id
+        });
+
+        if (res.expert_advice) {
+          setMessages([{
+            agent: "Expert Agrotank",
+            message: `Culture prédite : ${res.predicted_crop}. ${res.expert_advice}`,
+            type: "bot"
+          }]);
+        }
+      } else {
+        setMessages([{
+          agent: "Expert Agrotank",
+          message: "Aucune donnée de capteur disponible pour cette parcelle. Veuillez installer des capteurs pour obtenir des recommandations.",
+          type: "bot"
+        }]);
+      }
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim() || !selectedParcel) return;
+    if (!inputMessage.trim() || !selectedParcel || !latestSoilData) return;
 
     const userText = inputMessage;
     setInputMessage("");
@@ -59,10 +102,19 @@ export default function RecommandationsPage() {
     setIsTyping(true);
 
     try {
-      const response: any = await recommendationService.askQuestion(selectedParcel.id, userText);
-      setMessages(prev => [...prev, response]);
+      const res = await RecommandationsService.predictCropUnifiedApiV1RecommendationsPredictCropPost({
+        soil_data: latestSoilData,
+        query: userText,
+        parcelle_id: selectedParcel.id
+      });
+
+      setMessages(prev => [...prev, {
+        agent: "Expert Agrotank",
+        message: res.expert_advice || "Je n'ai pas pu générer de réponse spécifique.",
+        type: "bot"
+      }]);
     } catch (error) {
-      console.error(error);
+      console.error("Error in AI chat:", error);
     } finally {
       setIsTyping(false);
     }

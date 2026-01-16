@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import DashboardHeader from '@/components/layout/Header';
 import DashboardFooter from '@/components/layout/Footer';
-import { sensorService } from "@/features/sensors/services/sensorService";
+import { CapteursService } from "@/lib/services/CapteursService";
+import { ParcellesService } from "@/lib/services/ParcellesService";
+import { TerrainsService } from "@/lib/services/TerrainsService";
+import { Capteur } from "@/lib/models/Capteur";
+import { ParcelleResponse } from "@/lib/models/ParcelleResponse";
 import SensorForm from "@/features/sensors/components/SensorForm";
-import { parcelService } from "@/features/parcels/services/parcelService";
-import { Parcelle, Sensor } from "@/types/user";
 import {
   Thermometer,
   Droplets,
@@ -14,31 +16,30 @@ import {
 } from "lucide-react";
 
 export default function CapteursPage() {
-  // ==============================
-  // STATES
-  // ==============================
   const [view, setView] = useState("list");
-  const [sensors, setSensors] = useState<Sensor[]>([]);
-  const [parcelles, setParcelles] = useState<Parcelle[]>([]);
-  const [selectedSensor, setSelectedSensor] = useState<Sensor | null>(null);
-
+  const [sensors, setSensors] = useState<Capteur[]>([]);
+  const [parcelles, setParcelles] = useState<ParcelleResponse[]>([]);
+  const [selectedSensor, setSelectedSensor] = useState<Capteur | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // ==============================
-  // LOAD DATA
-  // ==============================
   const loadData = async () => {
     try {
       setLoading(true);
-      const [sData, pData]: [Sensor[], Parcelle[]] = await Promise.all([
-        sensorService.getSensors(),
-        parcelService.getParcelles(),
-      ]);
+      // Fetch parcelles first to be able to map names
+      const terrains = await TerrainsService.getAllTerrainsApiV1TerrainsTerrainsGet();
+      const allParcellesPromises = terrains.map(t =>
+        ParcellesService.getParcellesByTerrainApiV1ParcellesParcellesTerrainTerrainIdGet(t.id)
+      );
+      const allParcellesResults = await Promise.all(allParcellesPromises);
+      const flattenedParcelles = allParcellesResults.flat();
+      setParcelles(flattenedParcelles);
+
+      // Fetch all sensors
+      const sData = await CapteursService.readCapteursApiV1CapteursGet();
       setSensors(sData);
-      setParcelles(pData);
       setView("list");
     } catch (err) {
-      console.error(err);
+      console.error("Error loading sensors data:", err);
     } finally {
       setLoading(false);
     }
@@ -48,22 +49,20 @@ export default function CapteursPage() {
     loadData();
   }, []);
 
-  // ==============================
-  // ACTIONS
-  // ==============================
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce capteur ?")) {
-      await sensorService.deleteSensor(id);
-      loadData();
+      try {
+        await CapteursService.deleteCapteurApiV1CapteursCapteurIdDelete(id);
+        loadData();
+      } catch (err) {
+        console.error("Error deleting sensor:", err);
+      }
     }
   };
 
-  // ==============================
-  // HELPERS
-  // ==============================
-  const getParcelName = (parcelId: number): string => {
-    // Loose equality for ID matching (string vs number)
-    const parcel = parcelles.find((p) => p.id == parcelId);
+  const getParcelName = (parcelId: string | null | undefined): string => {
+    if (!parcelId) return "Non assignée";
+    const parcel = parcelles.find((p) => p.id === parcelId);
     return parcel?.nom ?? "Non assignée";
   };
 
@@ -120,7 +119,7 @@ export default function CapteursPage() {
                     {/* Header Card */}
                     <div className="flex justify-between items-start mb-4">
                       <div className="bg-green-50 p-3 rounded-2xl">
-                        {getIconForType(sensor.typeMesure)}
+                        {getIconForType(sensor.nom)}
                       </div>
                       <div className="flex gap-3">
                         <button
@@ -130,7 +129,7 @@ export default function CapteursPage() {
                           Modifier
                         </button>
                         <button
-                          onClick={() => handleDelete(sensor.id!)}
+                          onClick={() => handleDelete(sensor.id)}
                           className="text-red-400 font-bold text-sm hover:underline"
                         >
                           Supprimer
@@ -141,14 +140,14 @@ export default function CapteursPage() {
                     {/* Body Card */}
                     <h3 className="font-extrabold text-xl text-gray-800 mb-1">{sensor.nom}</h3>
                     <p className="text-gray-400 text-sm mb-6 bg-gray-50 inline-block px-2 py-1 rounded-lg">
-                      {sensor.typeMesure}
+                      {sensor.code}
                     </p>
 
                     {/* Footer Card */}
                     <div className="flex justify-between items-center pt-4 border-t border-gray-50">
                       <span className="text-gray-500 font-medium text-sm">Parcelle</span>
                       <span className="text-[#22C55E] font-bold text-sm">
-                        {getParcelName(sensor.parcelleId)}
+                        {getParcelName(sensor.parcelle_id)}
                       </span>
                     </div>
                   </div>

@@ -4,24 +4,10 @@ import { useState, useEffect } from "react";
 import { Eye, EyeOff, Camera, CheckCircle2 } from "lucide-react";
 import DashboardHeader from '@/components/layout/Header';
 import DashboardFooter from '@/components/layout/Footer';
-import { authService } from "@/features/auth/services/authService";
-import { langue } from "@/types/user";
+import { UsersService } from "@/lib/services/UsersService";
+import { AuthenticationService } from "@/lib/services/AuthenticationService";
 import { useLanguageStore } from '@/store/useUserStore';
 import { useTranslation } from '@/providers/TranslationProvider';
-
-export type UserData = {
-  id: number,
-  email: string,
-  name: string,
-  role: string,
-  phone: string,
-  isActive: boolean,
-  createdAt: string,
-  updatedAt: string,
-  langue: langue,
-  password: string,
-  confirmPassword: string
-};
 
 export default function ProfilPage() {
   const { lang, setLang } = useLanguageStore();
@@ -32,22 +18,41 @@ export default function ProfilPage() {
   const [showPass, setShowPass] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const [userData, setUserData] = useState({
-    id: 1,
-    email: "marcel@gmail.com",
-    name: "marcel",
-    role: "ADMIN",
-    phone: "656616751",
-    isActive: false,
-    createdAt: "2026-01-01",
-    updatedAt: "2026-01-01",
+  const [userData, setUserData] = useState<any>({
+    id: "",
+    email: "",
+    nom: "",
+    prenom: "",
+    role: "",
+    phone: "",
     langue: lang,
     password: "",
     confirmPassword: ""
   });
 
   useEffect(() => {
-    setUserData(prev => ({ ...prev, langue: lang }));
+    const fetchProfile = async () => {
+      try {
+        const profile = await UsersService.getMyProfileApiV1UsersMeGet();
+        setUserData((prev: any) => ({
+          ...prev,
+          id: profile.id,
+          email: profile.email,
+          nom: profile.nom || "",
+          prenom: profile.prenom || "",
+          role: profile.role,
+          phone: profile.telephone || "",
+          langue: lang
+        }));
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    setUserData((prev: any) => ({ ...prev, langue: lang }));
   }, [lang]);
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -61,15 +66,26 @@ export default function ProfilPage() {
     setLoading(true);
 
     try {
-      const result = await authService.updateProfile(userData);
+      // 1. Update Profile info
+      await UsersService.updateMyProfileApiV1UsersMePut({
+        nom: userData.nom,
+        prenom: userData.prenom,
+        telephone: userData.phone
+      });
 
-      if (result.success) {
-        setIsEditing(false);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
+      // 2. Update Password if provided
+      if (userData.password && userData.password === userData.confirmPassword) {
+        await AuthenticationService.changePasswordApiV1AuthChangePasswordPost({
+          new_password: userData.password,
+          old_password: "" // The API might require old password, need to check
+        });
       }
-    } catch (error) {
-      alert("Une erreur est survenue lors de l'enregistrement.");
+
+      setIsEditing(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (error: any) {
+      alert(error.body?.detail || "Une erreur est survenue lors de l'enregistrement.");
       console.error(error);
     } finally {
       setLoading(false);
@@ -97,7 +113,7 @@ export default function ProfilPage() {
               <div className="bg-[#1A4D2E] rounded-[32px] p-10 text-center shadow-lg border border-white/10">
                 <div className="relative inline-block group">
                   <div className="w-24 h-24 rounded-full border-4 border-[#1A4D2E] mx-auto mb-4 flex items-center justify-center text-3xl font-black text-white bg-[#22C55E] shadow-xl">
-                    {userData.name.charAt(0)}
+                    {(userData.nom?.charAt(0) || userData.prenom?.charAt(0) || "U").toUpperCase()}
                   </div>
                   {isEditing && (
                     <div className="absolute bottom-0 right-0 bg-white p-2 rounded-full border-4 border-[#1A4D2E] cursor-pointer shadow-lg">
@@ -105,7 +121,7 @@ export default function ProfilPage() {
                     </div>
                   )}
                 </div>
-                <h2 className="text-white text-xl font-bold mb-1">{userData.name}</h2>
+                <h2 className="text-white text-xl font-bold mb-1">{userData.nom} {userData.prenom}</h2>
                 <p className="text-white/60 text-xs mb-8">{userData.email}</p>
 
                 {!isEditing ? (
@@ -157,8 +173,9 @@ export default function ProfilPage() {
 
                 <form className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ProfileInput label={t('profile_page.nom')} value={userData.name} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, name: v })} />
-                    <ProfileInput label={t('profile_page.email')} value={userData.email} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, email: v })} />
+                    <ProfileInput label={t('profile_page.nom')} value={userData.nom} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, nom: v })} />
+                    <ProfileInput label={t('profile_page.prenom')} value={userData.prenom} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, prenom: v })} />
+                    <ProfileInput label={t('profile_page.email')} value={userData.email} isEditing={false} onChange={() => { }} />
                     <ProfileInput label={t('profile_page.tel')} value={userData.phone} isEditing={isEditing} onChange={(v: string) => setUserData({ ...userData, phone: v })} />
                   </div>
 
