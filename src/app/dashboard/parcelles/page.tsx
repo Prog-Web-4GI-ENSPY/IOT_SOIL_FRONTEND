@@ -1,0 +1,92 @@
+"use client";
+import { useState, useEffect } from "react";
+import DashboardHeader from '@/components/layout/Header';
+import DashboardFooter from '@/components/layout/Footer';
+import ParcelCard from "@/features/parcels/components/ParcelCard";
+import ParcelForm from "@/features/parcels/components/ParcelForm";
+import { ParcellesService } from "@/lib/services/ParcellesService";
+import { TerrainsService } from "@/lib/services/TerrainsService";
+import { useTranslation } from "@/providers/TranslationProvider";
+
+export default function ParcellesPage() {
+  const { t } = useTranslation();
+  const [view, setView] = useState("list");
+  const [parcelles, setParcelles] = useState<any[]>([]);
+  const [terrains, setTerrains] = useState<any[]>([]);
+  const [selectedParcel, setSelectedParcel] = useState(null);
+
+  const loadData = async () => {
+    try {
+      const terrainsData = await TerrainsService.getAllTerrainsApiV1TerrainsTerrainsGet();
+      setTerrains(terrainsData);
+
+      const allParcellesPromises = terrainsData.map(t =>
+        ParcellesService.getParcellesByTerrainApiV1ParcellesParcellesTerrainTerrainIdGet(t.id)
+      );
+
+      const allParcellesResults = await Promise.all(allParcellesPromises);
+      const flattenedParcelles = allParcellesResults.flat();
+
+      setParcelles(flattenedParcelles);
+      setView("list");
+    } catch (error) {
+      console.error("Error loading parcelles data:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const getTerrainName = (id: string | number) => {
+    const terrain = terrains.find(tr => String(tr.id) === String(id));
+    return terrain ? terrain.nom : "Terrain inconnu";
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#F1F8F4]">
+      <DashboardHeader />
+      <main className="flex-grow p-8 max-w-7xl mx-auto w-full">
+        {view === "form" ? (
+          <ParcelForm initialData={selectedParcel} onSuccess={loadData} onCancel={() => setView("list")} />
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-10">
+              <h1 className="text-3xl font-extrabold text-green-900">{t('parcelles_list.title')}</h1>
+              <button
+                onClick={() => { setSelectedParcel(null); setView("form"); }}
+                className="bg-[#22C55E] text-white px-8 py-3 rounded-2xl font-bold shadow-lg hover:bg-[#16A34A] transition-all transform active:scale-95"
+              >
+                + {t('parcelles_list.add_button')}
+              </button>
+            </div>
+
+            {parcelles.length === 0 ? (
+              <div className="bg-white rounded-[40px] border-2 border-dashed h-[400px] flex items-center justify-center">
+                <p className="text-gray-400 text-xl font-semibold">{t('parcelles_list.no_parcelles')}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {parcelles.map(p => (
+                  <ParcelCard
+                    key={p.id}
+                    parcel={p}
+                    terrainName={getTerrainName(p.terrainId)}
+                    onEdit={() => { setSelectedParcel(p); setView("form"); }}
+                    onDelete={async () => {
+                      if (confirm(t('parcelles_list.delete_confirm'))) {
+                        await ParcellesService.deleteParcelleApiV1ParcellesParcellesParcelleIdDelete(p.id);
+                        loadData();
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </main>
+      <DashboardFooter />
+    </div>
+  );
+}
